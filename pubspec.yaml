@@ -1,0 +1,42 @@
+name: valley_moon
+description: "Valley Moon - RPG de Fazenda místico em Pixel Art construído com Flutter e Flame."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  flame: ^1.38.2
+  flame_tiled: ^3.1.2
+  flame_audio: ^2.12.2
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.1.6
+  google_fonts: ^8.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/images/player/
+    - assets/images/tiles/
+    - assets/tiles/
+    - assets/audio/
+    - assets/fonts/
+
+  fonts:
+    - family: PressStart2P
+      fonts:
+        - asset: assets/fonts/PressStart2P.ttf
