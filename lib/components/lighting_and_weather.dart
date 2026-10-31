@@ -310,3 +310,4 @@ class _FogCloud {
     required this.radius,
   });
 }
+

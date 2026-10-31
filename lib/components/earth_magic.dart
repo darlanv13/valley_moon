@@ -107,3 +107,4 @@ class RainTotemComponent extends PositionComponent
     canvas.drawCircle(const Offset(8, 16), 4, runePaint);
   }
 }
+

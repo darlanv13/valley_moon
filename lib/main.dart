@@ -2,6 +2,9 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'game/valley_moon_game.dart';
+import 'models/npc_dialogue_system.dart';
+import 'ui/dialogue_dialog.dart';
+import 'ui/diary_and_altars_dialog.dart';
 import 'ui/hud_overlay.dart';
 import 'ui/inventory_dialog.dart';
 
@@ -34,6 +37,19 @@ class ValleyMoonApp extends StatelessWidget {
             'Inventory': (context, game) => InventoryDialog(
                   game: game,
                   onClose: () => game.overlays.remove('Inventory'),
+                ),
+            'Dialogue': (context, game) {
+              final npc = game.activeDialogueNpc ?? NpcId.bento;
+              return DialogueDialog(
+                key: ValueKey(npc),
+                game: game,
+                npcId: npc,
+                onClose: () => game.overlays.remove('Dialogue'),
+              );
+            },
+            'DiaryAltars': (context, game) => DiaryAndAltarsDialog(
+                  game: game,
+                  onClose: () => game.overlays.remove('DiaryAltars'),
                 ),
           },
           initialActiveOverlays: const ['HUD'],

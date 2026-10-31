@@ -66,3 +66,4 @@ def generate_rustic_ui():
 
 if __name__ == '__main__':
     generate_rustic_ui()
+

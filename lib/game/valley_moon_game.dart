@@ -7,11 +7,15 @@ import 'package:flutter/services.dart';
 import '../components/farm_grid_manager.dart';
 import '../components/farm_world.dart';
 import '../components/lighting_and_weather.dart';
+import '../components/map_transition.dart';
+import '../components/npc_component.dart';
 import '../components/player.dart';
 import '../components/time_manager.dart';
 import '../core/audio_manager.dart';
 import '../core/constants.dart';
 import '../models/inventory_system.dart';
+import '../models/npc_dialogue_system.dart';
+import '../models/story_system.dart';
 import '../models/time_system.dart';
 
 /// The central game class for Valley Moon.
@@ -28,7 +32,11 @@ class ValleyMoonGame extends FlameGame
   final GameState gameState = GameState();
   final InventoryState inventory = InventoryState();
   final ValleyMoonAudioManager audioManager = ValleyMoonAudioManager();
+  final RelationshipManager relationships = RelationshipManager();
+  final StoryManager story = StoryManager();
 
+  GameLocation currentLocation = GameLocation.farm;
+  NpcId? activeDialogueNpc;
   bool audioEnabled = true;
 
   ValleyMoonGame()
@@ -63,30 +71,71 @@ class ValleyMoonGame extends FlameGame
     );
     await world.add(player);
 
-    // 5. Add Weather Particle System
+    // 5. Add World NPCs with dynamic schedules
+    for (final npcId in NpcId.values) {
+      final npc = NpcComponent(
+        npcId: npcId,
+        position: Vector2(180 + npcId.index * 36.0, 160),
+      );
+      await world.add(npc);
+    }
+
+    // 6. Add Map Portals / Transitions
+    await _setupMapPortals();
+
+    // 7. Add Weather Particle System
     weatherParticles = WeatherParticlesComponent();
     await world.add(weatherParticles);
 
-    // 6. Add Dynamic Day/Night & Lunar Lighting Overlay
+    // 8. Add Dynamic Day/Night & Lunar Lighting Overlay
     lightingOverlay = LightingOverlayComponent();
     await world.add(lightingOverlay);
 
-    // 7. Add Time & Calendar Manager
+    // 9. Add Time & Calendar Manager
     timeManager = TimeManagerComponent();
     await add(timeManager);
 
-    // 8. Configure Camera to follow player smoothly within map boundaries
+    // 10. Configure Camera to follow player smoothly within map boundaries
     camera.follow(player);
     camera.setBounds(
       Rectangle.fromLTWH(0, 0, GameConstants.mapWidth, GameConstants.mapHeight),
       considerViewport: true,
     );
 
-    // 9. Setup Virtual Joystick on Viewport for Mobile/Touch
+    // 11. Setup Virtual Joystick on Viewport for Mobile/Touch
     _setupJoystick();
 
-    // 10. Start Initial Daytime Music
+    // 12. Start Initial Daytime Music
     playBGM(GameConstants.bgmVillage);
+  }
+
+  Future<void> _setupMapPortals() async {
+    // East Exit: Farm -> Village
+    await world.add(MapTransitionComponent(
+      targetLocation: GameLocation.village,
+      targetSpawnPosition: Vector2(40, 240),
+      position: Vector2(624, 200),
+      size: Vector2(16, 80),
+      portalName: 'Caminho para a Vila da Lareira',
+    ));
+
+    // North Exit: Farm -> Forest
+    await world.add(MapTransitionComponent(
+      targetLocation: GameLocation.forest,
+      targetSpawnPosition: Vector2(300, 420),
+      position: Vector2(280, 0),
+      size: Vector2(80, 16),
+      portalName: 'Floresta Sussurrante',
+    ));
+
+    // West Exit: Farm -> Mine Entrance
+    await world.add(MapTransitionComponent(
+      targetLocation: GameLocation.mineEntrance,
+      targetSpawnPosition: Vector2(580, 240),
+      position: Vector2(0, 200),
+      size: Vector2(16, 80),
+      portalName: 'Entrada da Mina Antiga',
+    ));
   }
 
   void _setupJoystick() {
@@ -124,6 +173,40 @@ class ValleyMoonGame extends FlameGame
     audioManager.playSFX(sfxName);
   }
 
+  void transitionTo(GameLocation target, Vector2 spawnPos) {
+    currentLocation = target;
+    if (isLoaded) {
+      player.position.setFrom(spawnPos);
+    }
+
+    switch (target) {
+      case GameLocation.farm:
+      case GameLocation.village:
+        playBGM(GameConstants.bgmVillage);
+        break;
+      case GameLocation.forest:
+      case GameLocation.tavern:
+        playBGM(GameConstants.bgmForest);
+        break;
+      case GameLocation.mineEntrance:
+        playBGM(GameConstants.bgmWind);
+        break;
+    }
+  }
+
+  void openDialogueWithNpc(NpcId id) {
+    activeDialogueNpc = id;
+    overlays.add('Dialogue');
+  }
+
+  void openDiaryAndAltars() {
+    if (overlays.isActive('DiaryAltars')) {
+      overlays.remove('DiaryAltars');
+    } else {
+      overlays.add('DiaryAltars');
+    }
+  }
+
   void toggleInventory() {
     if (overlays.isActive('Inventory')) {
       overlays.remove('Inventory');
@@ -142,6 +225,31 @@ class ValleyMoonGame extends FlameGame
       if (event.logicalKey == LogicalKeyboardKey.keyI ||
           event.logicalKey == LogicalKeyboardKey.keyB) {
         toggleInventory();
+        return KeyEventResult.handled;
+      }
+
+      // Toggle Grandfather's Diary & Altars with 'J'
+      if (event.logicalKey == LogicalKeyboardKey.keyJ) {
+        openDiaryAndAltars();
+        return KeyEventResult.handled;
+      }
+
+      // Interact with nearby NPC with 'E' or 'Enter'
+      if (event.logicalKey == LogicalKeyboardKey.keyE ||
+          event.logicalKey == LogicalKeyboardKey.enter) {
+        for (final child in world.children.whereType<NpcComponent>()) {
+          if (child.isPlayerNearby) {
+            child.interact();
+            return KeyEventResult.handled;
+          }
+        }
+      }
+
+      // Close modal on Escape
+      if (event.logicalKey == LogicalKeyboardKey.escape) {
+        if (overlays.isActive('Dialogue')) overlays.remove('Dialogue');
+        if (overlays.isActive('DiaryAltars')) overlays.remove('DiaryAltars');
+        if (overlays.isActive('Inventory')) overlays.remove('Inventory');
         return KeyEventResult.handled;
       }
 

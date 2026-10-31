@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../core/constants.dart';
 import '../game/valley_moon_game.dart';
 import '../models/time_system.dart';
+import 'npc_component.dart';
 import 'obstacle.dart';
 
 enum Direction { down, up, left, right }
@@ -196,6 +197,16 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
 
   void performAction(FarmerTool tool) {
     if (isPerformingAction) return;
+
+    // Check if player is near any NPC when interacting with hands or action button
+    if (tool == FarmerTool.hands) {
+      for (final child in game.world.children.whereType<NpcComponent>()) {
+        if (child.isPlayerNearby) {
+          child.interact();
+          return;
+        }
+      }
+    }
 
     isPerformingAction = true;
     _actionTimer = actionDuration;

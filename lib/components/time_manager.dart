@@ -37,3 +37,4 @@ class TimeManagerComponent extends Component
     }
   }
 }
+

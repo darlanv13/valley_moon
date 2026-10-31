@@ -32,6 +32,9 @@ flutter:
     - assets/images/
     - assets/images/player/
     - assets/images/tiles/
+    - assets/images/portraits/
+    - assets/images/characters/
+    - assets/images/ui/
     - assets/tiles/
     - assets/audio/
     - assets/fonts/

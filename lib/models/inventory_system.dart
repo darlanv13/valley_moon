@@ -451,6 +451,16 @@ class InventoryState extends ChangeNotifier {
     return total;
   }
 
+  int countOf(String itemId) {
+    int total = 0;
+    for (final slot in [...hotbar, ...backpack]) {
+      if (slot != null && slot.item.id == itemId) {
+        total += slot.count;
+      }
+    }
+    return total;
+  }
+
   bool hasIngredients(Map<String, int> required) {
     for (final entry in required.entries) {
       if (getItemCount(entry.key) < entry.value) {
@@ -542,3 +552,4 @@ class InventoryState extends ChangeNotifier {
     return true;
   }
 }
+

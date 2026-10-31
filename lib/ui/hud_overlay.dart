@@ -149,6 +149,32 @@ class HudOverlay extends StatelessWidget {
             ),
           ),
         ),
+
+        const SizedBox(width: 6),
+
+        // Grandfather's Diary & Altars Button
+        GestureDetector(
+          onTap: game.openDiaryAndAltars,
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: GameConstants.parchmentLight,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: GameConstants.rusticWood, width: 2.5),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black38,
+                  offset: Offset(1, 2),
+                  blurRadius: 3,
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Text('📖', style: TextStyle(fontSize: 18)),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -215,10 +241,20 @@ class HudOverlay extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Lunar Phase Title
+          // Location & Lunar Phase Title
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Text(
+                '${game.currentLocation.icon} ${game.currentLocation.displayName}',
+                style: const TextStyle(
+                  fontFamily: GameConstants.fontPixel,
+                  fontSize: 7,
+                  color: GameConstants.rusticWoodDark,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 8),
               Text(state.moonPhase.icon, style: const TextStyle(fontSize: 15)),
               const SizedBox(width: 5),
               Text(

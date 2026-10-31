@@ -234,3 +234,4 @@ def create_magic_objects():
 if __name__ == '__main__':
     create_crops_spritesheet()
     create_magic_objects()
+
