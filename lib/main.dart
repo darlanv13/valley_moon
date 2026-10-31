@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'game/valley_moon_game.dart';
 import 'ui/hud_overlay.dart';
+import 'ui/inventory_dialog.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +31,10 @@ class ValleyMoonApp extends StatelessWidget {
           game: ValleyMoonGame(),
           overlayBuilderMap: {
             'HUD': (context, game) => HudOverlay(game: game),
+            'Inventory': (context, game) => InventoryDialog(
+                  game: game,
+                  onClose: () => game.overlays.remove('Inventory'),
+                ),
           },
           initialActiveOverlays: const ['HUD'],
         ),

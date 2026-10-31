@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import '../game/valley_moon_game.dart';
+import '../models/inventory_system.dart';
 import '../models/time_system.dart';
 
-/// The rustic HUD Overlay in aged parchment and carved wood.
+/// The rustic HUD Overlay: Top status bar and bottom 10-slot hotbar.
 class HudOverlay extends StatelessWidget {
   final ValleyMoonGame game;
 
@@ -12,42 +13,43 @@ class HudOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: game.gameState,
+      listenable: Listenable.merge([game.gameState, game.inventory]),
       builder: (context, _) {
         final state = game.gameState;
+        final inv = game.inventory;
 
         return SafeArea(
           child: Stack(
             children: [
-              // 1. Top-Left: Health, Energy & Coin Pouch
+              // 1. Top-Left: Health, Energy/Stamina, Gold & Backpack Button
               Positioned(
-                top: 10,
+                top: 8,
                 left: 10,
                 child: _buildPlayerStats(state),
               ),
 
-              // 2. Top-Right: Lunar Phase, Season, Weather & Clock
+              // 2. Top-Right: Rustic Wooden Clock, Season, Weather & Lunar Phase
               Positioned(
-                top: 10,
+                top: 8,
                 right: 10,
                 child: _buildLunarClock(state),
               ),
 
-              // 3. Bottom-Center: Rustic Wooden Scrollable Hotbar
+              // 3. Bottom-Center: 10-Slot Quick Hotbar
               Positioned(
-                bottom: 12,
-                left: 70,
-                right: 80,
+                bottom: 10,
+                left: 0,
+                right: 0,
                 child: Center(
-                  child: _buildToolHotbar(state),
+                  child: _buildTenSlotHotbar(inv),
                 ),
               ),
 
-              // 4. Bottom-Right: Action Button (Touch)
+              // 4. Bottom-Right: Touch Action Button (USAR)
               Positioned(
-                bottom: 16,
-                right: 12,
-                child: _buildActionButton(state),
+                bottom: 14,
+                right: 14,
+                child: _buildActionButton(inv),
               ),
             ],
           ),
@@ -57,60 +59,97 @@ class HudOverlay extends StatelessWidget {
   }
 
   Widget _buildPlayerStats(GameState state) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: GameConstants.parchmentLight,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: GameConstants.rusticWood, width: 3),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black45,
-            offset: Offset(2, 2),
-            blurRadius: 4,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildStatBar(
-            label: 'HP',
-            icon: Icons.favorite,
-            iconColor: GameConstants.healthRed,
-            value: state.health,
-            maxValue: state.maxHealth,
-            barColor: GameConstants.healthRed,
-          ),
-          const SizedBox(height: 4),
-          _buildStatBar(
-            label: 'EN',
-            icon: Icons.bolt,
-            iconColor: Colors.amber[800]!,
-            value: state.energy,
-            maxValue: state.maxEnergy,
-            barColor: GameConstants.energyGreen,
-          ),
-          const SizedBox(height: 5),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('🪙', style: TextStyle(fontSize: 13)),
-              const SizedBox(width: 4),
-              Text(
-                '${state.coins} Ouro',
-                style: const TextStyle(
-                  fontFamily: GameConstants.fontPixel,
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  color: GameConstants.rusticWoodDark,
-                ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+          decoration: BoxDecoration(
+            color: GameConstants.parchmentLight,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: GameConstants.rusticWood, width: 3),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black45,
+                offset: Offset(2, 2),
+                blurRadius: 4,
               ),
             ],
           ),
-        ],
-      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Health Bar
+              _buildStatBar(
+                label: 'HP',
+                icon: Icons.favorite,
+                iconColor: GameConstants.healthRed,
+                value: state.health,
+                maxValue: state.maxHealth,
+                barColor: GameConstants.healthRed,
+              ),
+              const SizedBox(height: 4),
+
+              // Stamina / Vigor Bar
+              _buildStatBar(
+                label: 'VIGOR',
+                icon: Icons.bolt,
+                iconColor: Colors.amber[800]!,
+                value: state.energy,
+                maxValue: state.maxEnergy,
+                barColor: GameConstants.energyGreen,
+              ),
+              const SizedBox(height: 4),
+
+              // Village Gold
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('🪙', style: TextStyle(fontSize: 12)),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${state.coins} Ouro',
+                    style: const TextStyle(
+                      fontFamily: GameConstants.fontPixel,
+                      fontSize: 8,
+                      fontWeight: FontWeight.bold,
+                      color: GameConstants.rusticWoodDark,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(width: 8),
+
+        // Backpack / Inventory Button
+        GestureDetector(
+          onTap: game.toggleInventory,
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: GameConstants.parchmentLight,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: GameConstants.rusticWood, width: 2.5),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black38,
+                  offset: Offset(1, 2),
+                  blurRadius: 3,
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Text('🎒', style: TextStyle(fontSize: 18)),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -125,14 +164,14 @@ class HudOverlay extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 13, color: iconColor),
-        const SizedBox(width: 5),
+        Icon(icon, size: 12, color: iconColor),
+        const SizedBox(width: 4),
         Container(
-          width: 85,
-          height: 10,
+          width: 80,
+          height: 9,
           decoration: BoxDecoration(
             color: Colors.black26,
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(3),
             border: Border.all(color: GameConstants.rusticWoodDark, width: 1),
           ),
           child: FractionallySizedBox(
@@ -141,7 +180,7 @@ class HudOverlay extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: barColor,
-                borderRadius: BorderRadius.circular(3),
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
@@ -168,7 +207,7 @@ class HudOverlay extends StatelessWidget {
           BoxShadow(
             color: isBlood ? const Color(0x66AA1111) : Colors.black45,
             offset: const Offset(2, 2),
-            blurRadius: 5,
+            blurRadius: 4,
           ),
         ],
       ),
@@ -186,20 +225,20 @@ class HudOverlay extends StatelessWidget {
                 state.moonPhase.label,
                 style: TextStyle(
                   fontFamily: GameConstants.fontPixel,
-                  fontSize: 9,
+                  fontSize: 8,
                   fontWeight: FontWeight.bold,
                   color: isBlood ? const Color(0xFF8B0000) : GameConstants.rusticWoodDark,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 3),
+          const SizedBox(height: 2),
 
           // Season & Weather
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(state.weather.icon, style: const TextStyle(fontSize: 12)),
+              Text(state.weather.icon, style: const TextStyle(fontSize: 11)),
               const SizedBox(width: 4),
               Text(
                 '${state.season.label}, Dia ${state.day}',
@@ -211,7 +250,7 @@ class HudOverlay extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 3),
+          const SizedBox(height: 2),
 
           // Clock & Advance Day Button
           Row(
@@ -221,12 +260,12 @@ class HudOverlay extends StatelessWidget {
                 '$hourStr:$minuteStr',
                 style: const TextStyle(
                   fontFamily: GameConstants.fontPixel,
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: FontWeight.bold,
                   color: GameConstants.rusticWoodDark,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               GestureDetector(
                 onTap: () {
                   game.gameState.advanceDay();
@@ -242,7 +281,7 @@ class HudOverlay extends StatelessWidget {
                     'Dormir 💤',
                     style: TextStyle(
                       fontFamily: GameConstants.fontPixel,
-                      fontSize: 7,
+                      fontSize: 6,
                       color: GameConstants.parchmentLight,
                     ),
                   ),
@@ -255,13 +294,13 @@ class HudOverlay extends StatelessWidget {
     );
   }
 
-  Widget _buildToolHotbar(GameState state) {
+  // 10-Slot Quick Hotbar
+  Widget _buildTenSlotHotbar(InventoryState inv) {
     return Container(
-      constraints: const BoxConstraints(maxHeight: 52),
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       decoration: BoxDecoration(
         color: GameConstants.rusticWood,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: GameConstants.parchmentDark, width: 2),
         boxShadow: const [
           BoxShadow(
@@ -271,65 +310,107 @@ class HudOverlay extends StatelessWidget {
           ),
         ],
       ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: FarmerTool.values.map((tool) {
-            final isSelected = state.selectedTool == tool;
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(10, (index) {
+          final stack = inv.hotbar[index];
+          final isSelected = inv.selectedHotbarIndex == index;
 
-            return GestureDetector(
-              onTap: () {
-                game.gameState.selectTool(tool);
-                game.playSFX(GameConstants.sfxCoins);
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                margin: const EdgeInsets.symmetric(horizontal: 3),
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
+          return GestureDetector(
+            onTap: () {
+              inv.selectHotbarSlot(index);
+              final item = stack?.item;
+              if (item?.associatedTool != null) {
+                game.gameState.selectTool(item!.associatedTool!);
+              }
+              game.playSFX('wood_click.ogg');
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 120),
+              margin: const EdgeInsets.symmetric(horizontal: 2.5),
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? GameConstants.parchmentLight
+                    : GameConstants.rusticWoodDark,
+                borderRadius: BorderRadius.circular(5),
+                border: Border.all(
                   color: isSelected
-                      ? GameConstants.parchmentLight
-                      : GameConstants.rusticWoodDark,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: isSelected
-                        ? GameConstants.moonstoneGlow
-                        : GameConstants.parchmentDark.withValues(alpha: 0.5),
-                    width: isSelected ? 2.5 : 1.2,
-                  ),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: GameConstants.moonstoneGlow.withValues(alpha: 0.6),
-                            blurRadius: 6,
-                          ),
-                        ]
-                      : null,
+                      ? GameConstants.moonstoneGlow
+                      : GameConstants.parchmentDark.withValues(alpha: 0.4),
+                  width: isSelected ? 2.5 : 1,
                 ),
-                child: Center(
-                  child: Text(
-                    tool.icon,
-                    style: TextStyle(fontSize: isSelected ? 18 : 15),
-                  ),
-                ),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: GameConstants.moonstoneGlow.withValues(alpha: 0.6),
+                          blurRadius: 6,
+                        ),
+                      ]
+                    : null,
               ),
-            );
-          }).toList(),
-        ),
+              child: Stack(
+                children: [
+                  // Number Key Indicator (1 to 0)
+                  Positioned(
+                    top: 1,
+                    left: 2,
+                    child: Text(
+                      '${(index + 1) % 10}',
+                      style: TextStyle(
+                        fontFamily: GameConstants.fontPixel,
+                        fontSize: 6,
+                        color: isSelected ? Colors.brown[900] : Colors.grey[400],
+                      ),
+                    ),
+                  ),
+
+                  // Item Icon
+                  if (stack != null)
+                    Center(
+                      child: Text(
+                        stack.item.icon,
+                        style: TextStyle(fontSize: isSelected ? 16 : 14),
+                      ),
+                    ),
+
+                  // Stack Count
+                  if (stack != null && stack.count > 1)
+                    Positioned(
+                      bottom: 1,
+                      right: 2,
+                      child: Text(
+                        '${stack.count}',
+                        style: const TextStyle(
+                          fontFamily: GameConstants.fontPixel,
+                          fontSize: 6,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          );
+        }),
       ),
     );
   }
 
-  Widget _buildActionButton(GameState state) {
+  Widget _buildActionButton(InventoryState inv) {
+    final selectedStack = inv.selectedHotbarItem;
+    final icon = selectedStack?.item.icon ?? '✋';
+
     return GestureDetector(
       onTap: () {
-        game.player.performAction(state.selectedTool);
+        final tool = selectedStack?.item.associatedTool ?? game.gameState.selectedTool;
+        game.player.performAction(tool);
       },
       child: Container(
-        width: 56,
-        height: 56,
+        width: 54,
+        height: 54,
         decoration: BoxDecoration(
           color: GameConstants.parchmentLight,
           shape: BoxShape.circle,
@@ -346,10 +427,7 @@ class HudOverlay extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                state.selectedTool.icon,
-                style: const TextStyle(fontSize: 18),
-              ),
+              Text(icon, style: const TextStyle(fontSize: 16)),
               const Text(
                 'USAR',
                 style: TextStyle(

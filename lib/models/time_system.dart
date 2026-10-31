@@ -251,6 +251,16 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void restoreEnergy(double amount) {
+    energy = (energy + amount).clamp(0.0, maxEnergy);
+    notifyListeners();
+  }
+
+  void heal(double amount) {
+    health = (health + amount).clamp(0.0, maxHealth);
+    notifyListeners();
+  }
+
   void addCoins(int amount) {
     coins += amount;
     notifyListeners();

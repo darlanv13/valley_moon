@@ -2,14 +2,16 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/experimental.dart';
 import 'package:flame/game.dart';
-import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../components/farm_grid_manager.dart';
 import '../components/farm_world.dart';
 import '../components/lighting_and_weather.dart';
 import '../components/player.dart';
 import '../components/time_manager.dart';
+import '../core/audio_manager.dart';
 import '../core/constants.dart';
+import '../models/inventory_system.dart';
 import '../models/time_system.dart';
 
 /// The central game class for Valley Moon.
@@ -24,6 +26,9 @@ class ValleyMoonGame extends FlameGame
   JoystickComponent? joystick;
 
   final GameState gameState = GameState();
+  final InventoryState inventory = InventoryState();
+  final ValleyMoonAudioManager audioManager = ValleyMoonAudioManager();
+
   bool audioEnabled = true;
 
   ValleyMoonGame()
@@ -41,44 +46,47 @@ class ValleyMoonGame extends FlameGame
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // 1. Load the Farm World (Tiled Map & Obstacles)
+    // 1. Initialize Audio Manager
+    await audioManager.initialize();
+
+    // 2. Load the Farm World (Tiled Map & Obstacles)
     farmWorld = FarmWorldComponent();
     await world.add(farmWorld);
 
-    // 2. Add Farm Grid Manager (Interactive soil, crops, totems)
+    // 3. Add Farm Grid Manager (Interactive soil, crops, totems)
     farmGrid = FarmGridManager();
     await world.add(farmGrid);
 
-    // 3. Instantiate and add Player at spawn point
+    // 4. Instantiate and add Player at spawn point
     player = PlayerComponent(
       position: farmWorld.playerSpawnPosition,
     );
     await world.add(player);
 
-    // 4. Add Weather Particle System
+    // 5. Add Weather Particle System
     weatherParticles = WeatherParticlesComponent();
     await world.add(weatherParticles);
 
-    // 5. Add Dynamic Day/Night & Lunar Lighting Overlay
+    // 6. Add Dynamic Day/Night & Lunar Lighting Overlay
     lightingOverlay = LightingOverlayComponent();
     await world.add(lightingOverlay);
 
-    // 6. Add Time & Calendar Manager
+    // 7. Add Time & Calendar Manager
     timeManager = TimeManagerComponent();
     await add(timeManager);
 
-    // 7. Configure Camera to follow player smoothly within map boundaries
+    // 8. Configure Camera to follow player smoothly within map boundaries
     camera.follow(player);
     camera.setBounds(
       Rectangle.fromLTWH(0, 0, GameConstants.mapWidth, GameConstants.mapHeight),
       considerViewport: true,
     );
 
-    // 8. Setup Virtual Joystick on Viewport for Mobile/Touch
+    // 9. Setup Virtual Joystick on Viewport for Mobile/Touch
     _setupJoystick();
 
-    // 9. Start Background Music
-    _startAmbientMusic();
+    // 10. Start Initial Daytime Music
+    playBGM(GameConstants.bgmVillage);
   }
 
   void _setupJoystick() {
@@ -106,34 +114,69 @@ class ValleyMoonGame extends FlameGame
     camera.viewport.add(joystick!);
   }
 
-  void _startAmbientMusic() {
-    try {
-      if (audioEnabled) {
-        FlameAudio.bgm.initialize();
-        FlameAudio.bgm.play(GameConstants.bgmVillage, volume: 0.4);
-      }
-    } catch (_) {}
-  }
-
   void playBGM(String track) {
     if (!audioEnabled) return;
-    try {
-      FlameAudio.bgm.play(track, volume: 0.4);
-    } catch (_) {}
+    audioManager.crossfadeTo(track);
   }
 
   void playSFX(String sfxName) {
     if (!audioEnabled) return;
-    try {
-      FlameAudio.play(sfxName, volume: 0.6);
-    } catch (_) {}
+    audioManager.playSFX(sfxName);
+  }
+
+  void toggleInventory() {
+    if (overlays.isActive('Inventory')) {
+      overlays.remove('Inventory');
+    } else {
+      overlays.add('Inventory');
+    }
+  }
+
+  @override
+  KeyEventResult onKeyEvent(
+    KeyEvent event,
+    Set<LogicalKeyboardKey> keysPressed,
+  ) {
+    if (event is KeyDownEvent) {
+      // Toggle Inventory Modal with 'I' or 'B'
+      if (event.logicalKey == LogicalKeyboardKey.keyI ||
+          event.logicalKey == LogicalKeyboardKey.keyB) {
+        toggleInventory();
+        return KeyEventResult.handled;
+      }
+
+      // Hotbar Quick Slots 1 to 0
+      final hotbarKeys = [
+        LogicalKeyboardKey.digit1,
+        LogicalKeyboardKey.digit2,
+        LogicalKeyboardKey.digit3,
+        LogicalKeyboardKey.digit4,
+        LogicalKeyboardKey.digit5,
+        LogicalKeyboardKey.digit6,
+        LogicalKeyboardKey.digit7,
+        LogicalKeyboardKey.digit8,
+        LogicalKeyboardKey.digit9,
+        LogicalKeyboardKey.digit0,
+      ];
+
+      final keyIdx = hotbarKeys.indexOf(event.logicalKey);
+      if (keyIdx != -1) {
+        inventory.selectHotbarSlot(keyIdx);
+        final item = inventory.selectedHotbarItem?.item;
+        if (item?.associatedTool != null) {
+          gameState.selectTool(item!.associatedTool!);
+        }
+        playSFX('wood_click.ogg');
+        return KeyEventResult.handled;
+      }
+    }
+
+    return super.onKeyEvent(event, keysPressed);
   }
 
   @override
   void onRemove() {
-    try {
-      FlameAudio.bgm.stop();
-    } catch (_) {}
+    audioManager.stop();
     super.onRemove();
   }
 }
