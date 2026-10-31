@@ -30,6 +30,14 @@ enum PlayerState {
   waterUp,
   waterLeft,
   waterRight,
+  pickaxeDown,
+  pickaxeUp,
+  pickaxeLeft,
+  pickaxeRight,
+  swordDown,
+  swordUp,
+  swordLeft,
+  swordRight,
 }
 
 class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
@@ -136,6 +144,18 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
       PlayerState.waterUp: createAnim(actionsImage, row: 9, startCol: 0, frameCount: 2, stepTime: 0.18, loop: false),
       PlayerState.waterLeft: createAnim(actionsImage, row: 10, startCol: 0, frameCount: 2, stepTime: 0.18, loop: false),
       PlayerState.waterRight: createAnim(actionsImage, row: 11, startCol: 0, frameCount: 2, stepTime: 0.18, loop: false),
+
+      // Pickaxe Action (Mining strike)
+      PlayerState.pickaxeDown: createAnim(actionsImage, row: 4, startCol: 0, frameCount: 2, stepTime: 0.18, loop: false),
+      PlayerState.pickaxeUp: createAnim(actionsImage, row: 5, startCol: 0, frameCount: 2, stepTime: 0.18, loop: false),
+      PlayerState.pickaxeLeft: createAnim(actionsImage, row: 6, startCol: 0, frameCount: 2, stepTime: 0.18, loop: false),
+      PlayerState.pickaxeRight: createAnim(actionsImage, row: 7, startCol: 0, frameCount: 2, stepTime: 0.18, loop: false),
+
+      // Sword Action (Slash)
+      PlayerState.swordDown: createAnim(actionsImage, row: 0, startCol: 0, frameCount: 2, stepTime: 0.15, loop: false),
+      PlayerState.swordUp: createAnim(actionsImage, row: 1, startCol: 0, frameCount: 2, stepTime: 0.15, loop: false),
+      PlayerState.swordLeft: createAnim(actionsImage, row: 2, startCol: 0, frameCount: 2, stepTime: 0.15, loop: false),
+      PlayerState.swordRight: createAnim(actionsImage, row: 3, startCol: 0, frameCount: 2, stepTime: 0.15, loop: false),
     };
   }
 
@@ -210,6 +230,26 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
           case Direction.up: current = PlayerState.waterUp; break;
           case Direction.left: current = PlayerState.waterLeft; break;
           case Direction.right: current = PlayerState.waterRight; break;
+        }
+        break;
+      case FarmerTool.pickaxe:
+        game.playSFX(GameConstants.sfxChop);
+        game.gameState.useEnergy(2.0);
+        switch (facing) {
+          case Direction.down: current = PlayerState.pickaxeDown; break;
+          case Direction.up: current = PlayerState.pickaxeUp; break;
+          case Direction.left: current = PlayerState.pickaxeLeft; break;
+          case Direction.right: current = PlayerState.pickaxeRight; break;
+        }
+        break;
+      case FarmerTool.sword:
+        game.playSFX(GameConstants.sfxToolSwing);
+        game.gameState.useEnergy(1.0);
+        switch (facing) {
+          case Direction.down: current = PlayerState.swordDown; break;
+          case Direction.up: current = PlayerState.swordUp; break;
+          case Direction.left: current = PlayerState.swordLeft; break;
+          case Direction.right: current = PlayerState.swordRight; break;
         }
         break;
       case FarmerTool.hands:

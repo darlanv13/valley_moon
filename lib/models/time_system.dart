@@ -19,7 +19,9 @@ enum FarmerTool {
   hands('Mãos', '✋'),
   hoe('Enxada', '⛏️'),
   wateringCan('Regador', '💧'),
-  axe('Machado', '🪓');
+  axe('Machado', '🪓'),
+  pickaxe('Picareta', '⚒️'),
+  sword('Espada', '⚔️');
 
   final String label;
   final String icon;
