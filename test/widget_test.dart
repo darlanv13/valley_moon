@@ -12,10 +12,8 @@ void main() {
       expect(state.minute, 0);
       expect(state.moonPhase, MoonPhase.waxingMoon);
 
-      // Advance time by 6 seconds (60 in-game minutes)
-      for (var i = 0; i < 6; i++) {
-        state.updateTime(1.0);
-      }
+      // Advance time by 36 real seconds (60 in-game minutes in 12-min day cycle)
+      state.updateTime(36.0);
 
       expect(state.hour, 7);
       expect(state.minute, 0);

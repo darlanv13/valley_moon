@@ -33,9 +33,19 @@ class GameConstants {
   // Audio Assets
   static const String bgmVillage = 'village.ogg';
   static const String bgmForest = 'forest.ogg';
+  static const String bgmRain = 'rain.ogg';
+  static const String bgmWind = 'wind.ogg';
   static const String sfxFootstep = 'footstep_grass.ogg';
   static const String sfxChop = 'chop.ogg';
   static const String sfxToolSwing = 'tool_swing.ogg';
   static const String sfxDoorOpen = 'door_open.ogg';
   static const String sfxCoins = 'coins.ogg';
+  static const String sfxDig = 'dig.ogg';
+  static const String sfxWater = 'water.ogg';
+
+  // Crop & Magic Sprites
+  static const String cropsSheet = 'tiles/crops.png';
+  static const String scarecrowImg = 'tiles/scarecrow.png';
+  static const String rainTotemImg = 'tiles/rain_totem.png';
 }
+

@@ -13,3 +13,4 @@ class ObstacleComponent extends PositionComponent with CollisionCallbacks {
     add(RectangleHitbox(size: size, isSolid: true));
   }
 }
+

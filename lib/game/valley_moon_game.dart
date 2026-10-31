@@ -4,8 +4,11 @@ import 'package:flame/experimental.dart';
 import 'package:flame/game.dart';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
+import '../components/farm_grid_manager.dart';
 import '../components/farm_world.dart';
+import '../components/lighting_and_weather.dart';
 import '../components/player.dart';
+import '../components/time_manager.dart';
 import '../core/constants.dart';
 import '../models/time_system.dart';
 
@@ -13,7 +16,11 @@ import '../models/time_system.dart';
 class ValleyMoonGame extends FlameGame
     with HasCollisionDetection, HasKeyboardHandlerComponents {
   late final FarmWorldComponent farmWorld;
+  late final FarmGridManager farmGrid;
   late final PlayerComponent player;
+  late final LightingOverlayComponent lightingOverlay;
+  late final WeatherParticlesComponent weatherParticles;
+  late final TimeManagerComponent timeManager;
   JoystickComponent? joystick;
 
   final GameState gameState = GameState();
@@ -38,23 +45,39 @@ class ValleyMoonGame extends FlameGame
     farmWorld = FarmWorldComponent();
     await world.add(farmWorld);
 
-    // 2. Instantiate and add Player at spawn point
+    // 2. Add Farm Grid Manager (Interactive soil, crops, totems)
+    farmGrid = FarmGridManager();
+    await world.add(farmGrid);
+
+    // 3. Instantiate and add Player at spawn point
     player = PlayerComponent(
       position: farmWorld.playerSpawnPosition,
     );
     await world.add(player);
 
-    // 3. Configure Camera to follow player smoothly within map boundaries
+    // 4. Add Weather Particle System
+    weatherParticles = WeatherParticlesComponent();
+    await world.add(weatherParticles);
+
+    // 5. Add Dynamic Day/Night & Lunar Lighting Overlay
+    lightingOverlay = LightingOverlayComponent();
+    await world.add(lightingOverlay);
+
+    // 6. Add Time & Calendar Manager
+    timeManager = TimeManagerComponent();
+    await add(timeManager);
+
+    // 7. Configure Camera to follow player smoothly within map boundaries
     camera.follow(player);
     camera.setBounds(
       Rectangle.fromLTWH(0, 0, GameConstants.mapWidth, GameConstants.mapHeight),
       considerViewport: true,
     );
 
-    // 4. Setup Virtual Joystick on Viewport for Mobile/Touch
+    // 8. Setup Virtual Joystick on Viewport for Mobile/Touch
     _setupJoystick();
 
-    // 5. Start Background Music
+    // 9. Start Background Music
     _startAmbientMusic();
   }
 
@@ -89,24 +112,21 @@ class ValleyMoonGame extends FlameGame
         FlameAudio.bgm.initialize();
         FlameAudio.bgm.play(GameConstants.bgmVillage, volume: 0.4);
       }
-    } catch (_) {
-      // Audio driver might not be available in headless test environments
-    }
+    } catch (_) {}
+  }
+
+  void playBGM(String track) {
+    if (!audioEnabled) return;
+    try {
+      FlameAudio.bgm.play(track, volume: 0.4);
+    } catch (_) {}
   }
 
   void playSFX(String sfxName) {
     if (!audioEnabled) return;
     try {
       FlameAudio.play(sfxName, volume: 0.6);
-    } catch (_) {
-      // Graceful fallback if audio is disabled
-    }
-  }
-
-  @override
-  void update(double dt) {
-    super.update(dt);
-    gameState.updateTime(dt);
+    } catch (_) {}
   }
 
   @override

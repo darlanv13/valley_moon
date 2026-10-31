@@ -200,6 +200,16 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
     isPerformingAction = true;
     _actionTimer = actionDuration;
 
+    // Target the farm tile directly in front of the player
+    final targetPos = position.clone();
+    switch (facing) {
+      case Direction.down: targetPos.y += 18; break;
+      case Direction.up: targetPos.y -= 18; break;
+      case Direction.left: targetPos.x -= 18; break;
+      case Direction.right: targetPos.x += 18; break;
+    }
+    game.farmGrid.interact(targetPos, tool);
+
     // Trigger tool animation
     switch (tool) {
       case FarmerTool.axe:
@@ -243,6 +253,7 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
         }
         break;
       case FarmerTool.sword:
+      case FarmerTool.sickle:
         game.playSFX(GameConstants.sfxToolSwing);
         game.gameState.useEnergy(1.0);
         switch (facing) {
@@ -253,12 +264,19 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
         }
         break;
       case FarmerTool.hands:
+      case FarmerTool.seedsTurnip:
+      case FarmerTool.seedsWheat:
+      case FarmerTool.seedsScreamRoot:
+      case FarmerTool.seedsDewBlossom:
+      case FarmerTool.seedsGoldenWheat:
+      case FarmerTool.placeScarecrow:
+      case FarmerTool.placeRainTotem:
         game.playSFX(GameConstants.sfxToolSwing);
         switch (facing) {
-          case Direction.down: current = PlayerState.axeDown; break;
-          case Direction.up: current = PlayerState.axeUp; break;
-          case Direction.left: current = PlayerState.axeLeft; break;
-          case Direction.right: current = PlayerState.axeRight; break;
+          case Direction.down: current = PlayerState.hoeDown; break;
+          case Direction.up: current = PlayerState.hoeUp; break;
+          case Direction.left: current = PlayerState.hoeLeft; break;
+          case Direction.right: current = PlayerState.hoeRight; break;
         }
         break;
     }

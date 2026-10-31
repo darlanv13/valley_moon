@@ -75,3 +75,4 @@ with open("assets/fonts/PressStart2P.ttf", "wb") as f:
     f.write(download(font_url))
 
 print("Asset download step completed successfully!")
+
