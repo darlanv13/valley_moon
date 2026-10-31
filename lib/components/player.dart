@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../core/constants.dart';
 import '../game/valley_moon_game.dart';
 import '../models/time_system.dart';
+import 'animal_component.dart';
 import 'npc_component.dart';
 import 'obstacle.dart';
 
@@ -198,14 +199,25 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
   void performAction(FarmerTool tool) {
     if (isPerformingAction) return;
 
-    // Check if player is near any NPC when interacting with hands or action button
-    if (tool == FarmerTool.hands) {
+    // Check if player is near any NPC or Animal when interacting with hands or brush
+    if (tool == FarmerTool.hands || tool == FarmerTool.brush) {
       for (final child in game.world.children.whereType<NpcComponent>()) {
         if (child.isPlayerNearby) {
           child.interact();
           return;
         }
       }
+      for (final child in game.world.children.whereType<AnimalComponent>()) {
+        if (child.isPlayerNearby) {
+          child.interact();
+          return;
+        }
+      }
+    }
+
+    if (tool == FarmerTool.fishingRod) {
+      game.startFishing();
+      return;
     }
 
     isPerformingAction = true;
@@ -275,6 +287,8 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
         }
         break;
       case FarmerTool.hands:
+      case FarmerTool.brush:
+      case FarmerTool.fishingRod:
       case FarmerTool.seedsTurnip:
       case FarmerTool.seedsWheat:
       case FarmerTool.seedsScreamRoot:

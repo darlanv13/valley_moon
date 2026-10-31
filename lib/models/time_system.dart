@@ -110,6 +110,8 @@ enum FarmerTool {
   axe('Machado', '🪓'),
   pickaxe('Picareta', '⚒️'),
   sword('Espada', '⚔️'),
+  fishingRod('Vara de Pescar', '🎣'),
+  brush('Escova de Carinho', '🧹'),
   seedsTurnip('Semente Nabo', '🌱'),
   seedsWheat('Semente Trigo', '🌰'),
   seedsScreamRoot('Semente Raiz-Gritante', '🔮'),

@@ -42,10 +42,18 @@ class GameConstants {
   static const String sfxCoins = 'coins.ogg';
   static const String sfxDig = 'dig.ogg';
   static const String sfxWater = 'water.ogg';
+  static const String sfxSplash = 'splash.ogg';
+  static const String sfxAnimalPet = 'animal_pet.ogg';
+  static const String sfxFishingCast = 'fishing_cast.ogg';
+  static const String sfxFishingBite = 'fishing_bite.ogg';
+  static const String sfxFishCaught = 'fish_caught.ogg';
 
-  // Crop & Magic Sprites
+  // Crop, Magic & Creature Sprites
   static const String cropsSheet = 'tiles/crops.png';
   static const String scarecrowImg = 'tiles/scarecrow.png';
   static const String rainTotemImg = 'tiles/rain_totem.png';
+  static const String fishesSheet = 'fishing/fishes.png';
+  static const String bobberImg = 'fishing/bobber.png';
+  static const String rodImg = 'fishing/rod.png';
 }
 

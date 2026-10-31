@@ -4,6 +4,7 @@ import 'package:flame/experimental.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../components/animal_component.dart';
 import '../components/farm_grid_manager.dart';
 import '../components/farm_world.dart';
 import '../components/lighting_and_weather.dart';
@@ -13,6 +14,8 @@ import '../components/player.dart';
 import '../components/time_manager.dart';
 import '../core/audio_manager.dart';
 import '../core/constants.dart';
+import '../models/animal_system.dart';
+import '../models/fishing_system.dart';
 import '../models/inventory_system.dart';
 import '../models/npc_dialogue_system.dart';
 import '../models/story_system.dart';
@@ -34,9 +37,11 @@ class ValleyMoonGame extends FlameGame
   final ValleyMoonAudioManager audioManager = ValleyMoonAudioManager();
   final RelationshipManager relationships = RelationshipManager();
   final StoryManager story = StoryManager();
+  final AnimalManager animals = AnimalManager();
 
   GameLocation currentLocation = GameLocation.farm;
   NpcId? activeDialogueNpc;
+  FishData? activeFishingFish;
   bool audioEnabled = true;
 
   ValleyMoonGame()
@@ -80,22 +85,45 @@ class ValleyMoonGame extends FlameGame
       await world.add(npc);
     }
 
-    // 6. Add Map Portals / Transitions
+    // 6. Add Farm Animals & Mystical Creatures
+    for (int i = 0; i < animals.animals.length; i++) {
+      final a = animals.animals[i];
+      final homePos = Vector2(130.0 + (i % 4) * 36.0, 240.0 + (i ~/ 4) * 32.0);
+      final animalComp = AnimalComponent(
+        animal: a,
+        spawnPosition: homePos,
+        homeBarnPosition: homePos,
+      );
+      await world.add(animalComp);
+    }
+
+    // 7. Add Map Portals / Transitions
     await _setupMapPortals();
 
-    // 7. Add Weather Particle System
+    // 8. Add Weather Particle System
     weatherParticles = WeatherParticlesComponent();
     await world.add(weatherParticles);
 
-    // 8. Add Dynamic Day/Night & Lunar Lighting Overlay
+    // 9. Add Dynamic Day/Night & Lunar Lighting Overlay
     lightingOverlay = LightingOverlayComponent();
     await world.add(lightingOverlay);
 
-    // 9. Add Time & Calendar Manager
+    // 10. Add Time & Calendar Manager
     timeManager = TimeManagerComponent();
     await add(timeManager);
 
-    // 10. Configure Camera to follow player smoothly within map boundaries
+    // 11. Connect Reactive Hooks for Animals & Relationships
+    gameState.onNewDayStarted = () {
+      animals.onNewDay();
+      animals.updateWeatherAndShelter(gameState);
+      relationships.onNewDay();
+    };
+
+    gameState.addListener(() {
+      animals.updateWeatherAndShelter(gameState);
+    });
+
+    // 12. Configure Camera to follow player smoothly within map boundaries
     camera.follow(player);
     camera.setBounds(
       Rectangle.fromLTWH(0, 0, GameConstants.mapWidth, GameConstants.mapHeight),
@@ -207,6 +235,26 @@ class ValleyMoonGame extends FlameGame
     }
   }
 
+  void startFishing([FishData? customFish]) {
+    if (customFish != null) {
+      activeFishingFish = customFish;
+    } else {
+      final hasMoonBait = inventory.countOf('pot_moon_bait') > 0;
+      final rolled = FishData.rollFish(
+        location: currentLocation,
+        state: gameState,
+        hasMoonBait: hasMoonBait,
+      );
+      if (rolled.requiresMoonBait && hasMoonBait) {
+        inventory.consumeIngredients({'pot_moon_bait': 1});
+      }
+      activeFishingFish = rolled;
+    }
+    try {
+      overlays.add('FishingMinigame');
+    } catch (_) {}
+  }
+
   void toggleInventory() {
     if (overlays.isActive('Inventory')) {
       overlays.remove('Inventory');
@@ -234,10 +282,22 @@ class ValleyMoonGame extends FlameGame
         return KeyEventResult.handled;
       }
 
-      // Interact with nearby NPC with 'E' or 'Enter'
+      // Quick Fish action with 'F'
+      if (event.logicalKey == LogicalKeyboardKey.keyF) {
+        startFishing();
+        return KeyEventResult.handled;
+      }
+
+      // Interact with nearby NPC or Farm Animal with 'E' or 'Enter'
       if (event.logicalKey == LogicalKeyboardKey.keyE ||
           event.logicalKey == LogicalKeyboardKey.enter) {
         for (final child in world.children.whereType<NpcComponent>()) {
+          if (child.isPlayerNearby) {
+            child.interact();
+            return KeyEventResult.handled;
+          }
+        }
+        for (final child in world.children.whereType<AnimalComponent>()) {
           if (child.isPlayerNearby) {
             child.interact();
             return KeyEventResult.handled;
@@ -247,6 +307,7 @@ class ValleyMoonGame extends FlameGame
 
       // Close modal on Escape
       if (event.logicalKey == LogicalKeyboardKey.escape) {
+        if (overlays.isActive('FishingMinigame')) overlays.remove('FishingMinigame');
         if (overlays.isActive('Dialogue')) overlays.remove('Dialogue');
         if (overlays.isActive('DiaryAltars')) overlays.remove('DiaryAltars');
         if (overlays.isActive('Inventory')) overlays.remove('Inventory');

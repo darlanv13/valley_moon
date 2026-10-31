@@ -2,9 +2,11 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'game/valley_moon_game.dart';
+import 'models/fishing_system.dart';
 import 'models/npc_dialogue_system.dart';
 import 'ui/dialogue_dialog.dart';
 import 'ui/diary_and_altars_dialog.dart';
+import 'ui/fishing_minigame_dialog.dart';
 import 'ui/hud_overlay.dart';
 import 'ui/inventory_dialog.dart';
 
@@ -51,6 +53,15 @@ class ValleyMoonApp extends StatelessWidget {
                   game: game,
                   onClose: () => game.overlays.remove('DiaryAltars'),
                 ),
+            'FishingMinigame': (context, game) {
+              final fish = game.activeFishingFish ?? FishData.allFishes[0];
+              return FishingMinigameDialog(
+                key: ValueKey(fish.id),
+                game: game,
+                fish: fish,
+                onClose: () => game.overlays.remove('FishingMinigame'),
+              );
+            },
           },
           initialActiveOverlays: const ['HUD'],
         ),

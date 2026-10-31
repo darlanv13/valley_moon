@@ -8,6 +8,7 @@ enum ItemCategory {
   consumable,
   craftable,
   potion,
+  fish,
 }
 
 /// Represents an item definition in Valley Moon.
@@ -87,6 +88,15 @@ class GameItem {
     icon: '⚔️',
     category: ItemCategory.tool,
     associatedTool: FarmerTool.sword,
+  );
+
+  static const GameItem fishingRod = GameItem(
+    id: 'tool_rod',
+    name: 'Vara de Pescar de Bambu',
+    description: 'Vara rústica com carretel de madeira e linha de seda do vale.',
+    icon: '🎣',
+    category: ItemCategory.tool,
+    associatedTool: FarmerTool.fishingRod,
   );
 
   // Materials
@@ -274,6 +284,162 @@ class GameItem {
     category: ItemCategory.craftable,
     associatedTool: FarmerTool.placeRainTotem,
   );
+
+  // Animal Produce
+  static const GameItem egg = GameItem(
+    id: 'produce_egg',
+    name: 'Ovo Caipira',
+    description: 'Ovo fresco colhido de galinhas bem cuidadas.',
+    icon: '🥚',
+    category: ItemCategory.consumable,
+    sellPrice: 40,
+    energyRestore: 15.0,
+  );
+
+  static const GameItem milk = GameItem(
+    id: 'produce_milk',
+    name: 'Leite Fresco',
+    description: 'Leite cremoso ordenhado ao amanhecer.',
+    icon: '🥛',
+    category: ItemCategory.consumable,
+    sellPrice: 75,
+    energyRestore: 25.0,
+  );
+
+  static const GameItem wool = GameItem(
+    id: 'produce_wool',
+    name: 'Lã Macia',
+    description: 'Fardo de lã macia tosquiada com carinho.',
+    icon: '🧶',
+    category: ItemCategory.material,
+    sellPrice: 90,
+  );
+
+  static const GameItem truffle = GameItem(
+    id: 'produce_truffle',
+    name: 'Trufa da Floresta',
+    description: 'Fungo aromático desenterrado por porcos em solo fértil.',
+    icon: '🍄',
+    category: ItemCategory.consumable,
+    sellPrice: 150,
+    energyRestore: 30.0,
+  );
+
+  // Mystical Animal Produce
+  static const GameItem amberEgg = GameItem(
+    id: 'produce_amber_egg',
+    name: 'Ovo de Âmbar Místico',
+    description: 'Ovo translúcido reluzente com calor solar puro da Galinha de Âmbar.',
+    icon: '✨🥚',
+    category: ItemCategory.consumable,
+    sellPrice: 280,
+    energyRestore: 50.0,
+  );
+
+  static const GameItem vitalDew = GameItem(
+    id: 'produce_vital_dew',
+    name: 'Orvalho Vital do Musgo',
+    description: 'Gota etérea colhida do Bezerro-Musgo. Restaura 80 HP.',
+    icon: '🌿💧',
+    category: ItemCategory.potion,
+    sellPrice: 320,
+    healthRestore: 80.0,
+  );
+
+  static const GameItem floatingWool = GameItem(
+    id: 'produce_floating_wool',
+    name: 'Lã Flutuante Celeste',
+    description: 'Lã levitante como brisa azulada da Ovelha-Nuvem.',
+    icon: '☁️🧶',
+    category: ItemCategory.material,
+    sellPrice: 350,
+  );
+
+  // Fish Species
+  static const GameItem brookTrout = GameItem(
+    id: 'fish_brook_trout',
+    name: 'Truta do Riacho',
+    description: 'Peixe ágil com manchas douradas e cobreadas que habita águas límpidas.',
+    icon: '🐟',
+    category: ItemCategory.fish,
+    sellPrice: 65,
+    energyRestore: 20.0,
+  );
+
+  static const GameItem pondTilapia = GameItem(
+    id: 'fish_pond_tilapia',
+    name: 'Tilápia da Lagoa',
+    description: 'Peixe de escamas azuladas que nada em lagos serenos.',
+    icon: '🐠',
+    category: ItemCategory.fish,
+    sellPrice: 75,
+    energyRestore: 22.0,
+  );
+
+  static const GameItem pierCatfish = GameItem(
+    id: 'fish_pier_catfish',
+    name: 'Bagre do Píer',
+    description: 'Peixe corpulento de bigodes longos encontrado perto do píer.',
+    icon: '🐡',
+    category: ItemCategory.fish,
+    sellPrice: 95,
+    energyRestore: 28.0,
+  );
+
+  static const GameItem nightEel = GameItem(
+    id: 'fish_night_eel',
+    name: 'Enguia Noturna',
+    description: 'Enguia escura como a noite com barbatana amarela elétrica.',
+    icon: '🐍',
+    category: ItemCategory.fish,
+    sellPrice: 140,
+    energyRestore: 35.0,
+  );
+
+  // Legendary Fish Species
+  static const GameItem phantomCatfish = GameItem(
+    id: 'fish_phantom_catfish',
+    name: 'Bagre-Fantasma [Lendário]',
+    description: 'Lenda das cavernas: peixe translúcido que só morde em noites de neblina.',
+    icon: '👻🐟',
+    category: ItemCategory.fish,
+    sellPrice: 600,
+    energyRestore: 80.0,
+    healthRestore: 50.0,
+  );
+
+  static const GameItem astralCarp = GameItem(
+    id: 'fish_astral_carp',
+    name: 'Carpa Astral [Lendária]',
+    description: 'Guardiã cósmica do lago da floresta sob a luz da Lua Cheia.',
+    icon: '⭐🐟',
+    category: ItemCategory.fish,
+    sellPrice: 750,
+    energyRestore: 100.0,
+    healthRestore: 70.0,
+  );
+
+  static const GameItem moonlightSalmon = GameItem(
+    id: 'fish_moonlight_salmon',
+    name: 'Salmão do Luar [Lendário]',
+    description: 'Salmão prateado que sobe as correntes sob o luar sereno.',
+    icon: '🌙🐟',
+    category: ItemCategory.fish,
+    sellPrice: 850,
+    energyRestore: 90.0,
+    healthRestore: 60.0,
+  );
+
+  static const GameItem goldenSunfish = GameItem(
+    id: 'fish_golden_sunfish',
+    name: 'Peixe-Sol Dourado [Lendário]',
+    description: 'Criatura solar rara vista apenas em dias límpidos e quentes no píer.',
+    icon: '☀️🐟',
+    category: ItemCategory.fish,
+    sellPrice: 1000,
+    energyRestore: 120.0,
+    healthRestore: 90.0,
+  );
 }
 
 /// A stack of items in an inventory slot.
@@ -430,6 +596,7 @@ class InventoryState extends ChangeNotifier {
     backpack[5] = ItemStack(item: GameItem.goldenWheat, count: 2);
     backpack[6] = ItemStack(item: GameItem.seedsGoldenWheat, count: 2);
     backpack[7] = ItemStack(item: GameItem.rainTotem, count: 1);
+    backpack[8] = ItemStack(item: GameItem.fishingRod, count: 1);
   }
 
   ItemStack? get selectedHotbarItem => hotbar[selectedHotbarIndex];
