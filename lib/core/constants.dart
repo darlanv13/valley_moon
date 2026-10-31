@@ -47,13 +47,26 @@ class GameConstants {
   static const String sfxFishingCast = 'fishing_cast.ogg';
   static const String sfxFishingBite = 'fishing_bite.ogg';
   static const String sfxFishCaught = 'fish_caught.ogg';
+  static const String sfxSwordHit = 'sword_hit.ogg';
+  static const String sfxForgeAnvil = 'forge_anvil.ogg';
+  static const String sfxDash = 'dash.ogg';
+  static const String sfxMonsterHit = 'monster_hit.ogg';
+  static const String sfxMonsterDie = 'monster_die.ogg';
+  static const String sfxMagicCast = 'magic_cast.ogg';
+  static const String sfxPlayerHurt = 'player_hurt.ogg';
+  static const String sfxWoodClick = 'wood_click.ogg';
+  static const String sfxBagOpen = 'bag_open.ogg';
+  static const String sfxBagClose = 'bag_close.ogg';
 
-  // Crop, Magic & Creature Sprites
+  // Crop, Magic, Mine & Monster Sprites
   static const String cropsSheet = 'tiles/crops.png';
   static const String scarecrowImg = 'tiles/scarecrow.png';
   static const String rainTotemImg = 'tiles/rain_totem.png';
   static const String fishesSheet = 'fishing/fishes.png';
   static const String bobberImg = 'fishing/bobber.png';
   static const String rodImg = 'fishing/rod.png';
+  static const String caveTilesSheet = 'cave/cave_tiles.png';
+  static const String magicBoltImg = 'equipment/magic_bolt.png';
+  static const String slashArcImg = 'equipment/slash_arc.png';
 }
 

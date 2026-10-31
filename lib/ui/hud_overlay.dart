@@ -13,7 +13,7 @@ class HudOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge([game.gameState, game.inventory]),
+      listenable: Listenable.merge([game.gameState, game.inventory, game.combat]),
       builder: (context, _) {
         final state = game.gameState;
         final inv = game.inventory;
@@ -103,7 +103,7 @@ class HudOverlay extends StatelessWidget {
               ),
               const SizedBox(height: 4),
 
-              // Village Gold
+              // Village Gold & Combat Level
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -116,6 +116,16 @@ class HudOverlay extends StatelessWidget {
                       fontSize: 8,
                       fontWeight: FontWeight.bold,
                       color: GameConstants.rusticWoodDark,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '⚔️ Nv. ${game.combat.level}',
+                    style: const TextStyle(
+                      fontFamily: GameConstants.fontPixel,
+                      fontSize: 8,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF8B2500),
                     ),
                   ),
                 ],
@@ -198,6 +208,32 @@ class HudOverlay extends StatelessWidget {
             ),
             child: const Center(
               child: Text('🎣', style: TextStyle(fontSize: 18)),
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 6),
+
+        // Kael's Forge Button
+        GestureDetector(
+          onTap: game.openForge,
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: GameConstants.parchmentLight,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: GameConstants.rusticWood, width: 2.5),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black38,
+                  offset: Offset(1, 2),
+                  blurRadius: 3,
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Text('⚒️', style: TextStyle(fontSize: 18)),
             ),
           ),
         ),
@@ -465,44 +501,91 @@ class HudOverlay extends StatelessWidget {
     final selectedStack = inv.selectedHotbarItem;
     final icon = selectedStack?.item.icon ?? '✋';
 
-    return GestureDetector(
-      onTap: () {
-        final tool = selectedStack?.item.associatedTool ?? game.gameState.selectedTool;
-        game.player.performAction(tool);
-      },
-      child: Container(
-        width: 54,
-        height: 54,
-        decoration: BoxDecoration(
-          color: GameConstants.parchmentLight,
-          shape: BoxShape.circle,
-          border: Border.all(color: GameConstants.rusticWood, width: 3),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black45,
-              offset: Offset(2, 3),
-              blurRadius: 5,
-            ),
-          ],
-        ),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(icon, style: const TextStyle(fontSize: 16)),
-              const Text(
-                'USAR',
-                style: TextStyle(
-                  fontFamily: GameConstants.fontPixel,
-                  fontSize: 7,
-                  fontWeight: FontWeight.bold,
-                  color: GameConstants.rusticWoodDark,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        // Quick Dash / Esquivar Button
+        GestureDetector(
+          onTap: () => game.player.performDash(),
+          child: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: GameConstants.parchmentLight,
+              shape: BoxShape.circle,
+              border: Border.all(color: GameConstants.rusticWood, width: 2.5),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black45,
+                  offset: Offset(2, 3),
+                  blurRadius: 4,
                 ),
+              ],
+            ),
+            child: const Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('💨', style: TextStyle(fontSize: 14)),
+                  Text(
+                    'DASH',
+                    style: TextStyle(
+                      fontFamily: GameConstants.fontPixel,
+                      fontSize: 6,
+                      fontWeight: FontWeight.bold,
+                      color: GameConstants.rusticWoodDark,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
-      ),
+
+        const SizedBox(width: 8),
+
+        // Action / Tool Use Button
+        GestureDetector(
+          onTap: () {
+            final tool = selectedStack?.item.associatedTool ?? game.gameState.selectedTool;
+            game.player.performAction(tool);
+          },
+          child: Container(
+            width: 54,
+            height: 54,
+            decoration: BoxDecoration(
+              color: GameConstants.parchmentLight,
+              shape: BoxShape.circle,
+              border: Border.all(color: GameConstants.rusticWood, width: 3),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black45,
+                  offset: Offset(2, 3),
+                  blurRadius: 5,
+                ),
+              ],
+            ),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(icon, style: const TextStyle(fontSize: 16)),
+                  const Text(
+                    'USAR',
+                    style: TextStyle(
+                      fontFamily: GameConstants.fontPixel,
+                      fontSize: 7,
+                      fontWeight: FontWeight.bold,
+                      color: GameConstants.rusticWoodDark,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

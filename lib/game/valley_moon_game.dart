@@ -5,6 +5,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../components/animal_component.dart';
+import '../components/combat_and_mine_components.dart';
 import '../components/farm_grid_manager.dart';
 import '../components/farm_world.dart';
 import '../components/lighting_and_weather.dart';
@@ -15,6 +16,7 @@ import '../components/time_manager.dart';
 import '../core/audio_manager.dart';
 import '../core/constants.dart';
 import '../models/animal_system.dart';
+import '../models/combat_and_mining_system.dart';
 import '../models/fishing_system.dart';
 import '../models/inventory_system.dart';
 import '../models/npc_dialogue_system.dart';
@@ -38,6 +40,8 @@ class ValleyMoonGame extends FlameGame
   final RelationshipManager relationships = RelationshipManager();
   final StoryManager story = StoryManager();
   final AnimalManager animals = AnimalManager();
+  final PlayerCombatStats combat = PlayerCombatStats();
+  final MineFloorManager mine = MineFloorManager();
 
   GameLocation currentLocation = GameLocation.farm;
   NpcId? activeDialogueNpc;
@@ -218,7 +222,28 @@ class ValleyMoonGame extends FlameGame
         break;
       case GameLocation.mineEntrance:
         playBGM(GameConstants.bgmWind);
+        if (mine.activeFloor == null) {
+          mine.loadFloor(1, story: story);
+        }
+        spawnMineFloorMonsters();
         break;
+    }
+  }
+
+  void spawnMineFloorMonsters() {
+    if (mine.activeFloor == null) return;
+    // Remove existing monsters from the world
+    for (final monster in world.children.whereType<MonsterComponent>().toList()) {
+      monster.removeFromParent();
+    }
+    // Spawn monsters from the current floor
+    for (int i = 0; i < mine.activeFloor!.monsters.length; i++) {
+      final mData = mine.activeFloor!.monsters[i];
+      final pos = Vector2(
+        100.0 + (i % 4) * 80.0,
+        120.0 + (i ~/ 4) * 60.0,
+      );
+      world.add(MonsterComponent(data: mData, position: pos));
     }
   }
 
@@ -232,6 +257,16 @@ class ValleyMoonGame extends FlameGame
       overlays.remove('DiaryAltars');
     } else {
       overlays.add('DiaryAltars');
+    }
+  }
+
+  void openForge() {
+    if (overlays.isActive('Forge')) {
+      overlays.remove('Forge');
+    } else {
+      try {
+        overlays.add('Forge');
+      } catch (_) {}
     }
   }
 
@@ -288,6 +323,18 @@ class ValleyMoonGame extends FlameGame
         return KeyEventResult.handled;
       }
 
+      // Quick Dash dodge with Spacebar
+      if (event.logicalKey == LogicalKeyboardKey.space) {
+        player.performDash();
+        return KeyEventResult.handled;
+      }
+
+      // Open Kael's Forge with 'K'
+      if (event.logicalKey == LogicalKeyboardKey.keyK) {
+        openForge();
+        return KeyEventResult.handled;
+      }
+
       // Interact with nearby NPC or Farm Animal with 'E' or 'Enter'
       if (event.logicalKey == LogicalKeyboardKey.keyE ||
           event.logicalKey == LogicalKeyboardKey.enter) {
@@ -307,6 +354,7 @@ class ValleyMoonGame extends FlameGame
 
       // Close modal on Escape
       if (event.logicalKey == LogicalKeyboardKey.escape) {
+        if (overlays.isActive('Forge')) overlays.remove('Forge');
         if (overlays.isActive('FishingMinigame')) overlays.remove('FishingMinigame');
         if (overlays.isActive('Dialogue')) overlays.remove('Dialogue');
         if (overlays.isActive('DiaryAltars')) overlays.remove('DiaryAltars');

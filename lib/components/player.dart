@@ -6,6 +6,7 @@ import '../core/constants.dart';
 import '../game/valley_moon_game.dart';
 import '../models/time_system.dart';
 import 'animal_component.dart';
+import 'combat_and_mine_components.dart';
 import 'npc_component.dart';
 import 'obstacle.dart';
 
@@ -55,6 +56,10 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
 
   double _footstepTimer = 0.0;
   static const double footstepInterval = 0.35;
+
+  bool _isDashing = false;
+  double _dashTimer = 0.0;
+  double _dashCooldown = 0.0;
 
   // Collision hitbox: centered at the character's feet (in 48x48 cell)
   late final RectangleHitbox feetHitbox;
@@ -196,6 +201,24 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
     return true;
   }
 
+  bool performDash() {
+    if (_dashCooldown > 0 || isPerformingAction) return false;
+    _isDashing = true;
+    _dashTimer = 0.18;
+    _dashCooldown = 0.65;
+    game.playSFX(GameConstants.sfxDash);
+
+    final dashDir = Vector2.zero();
+    switch (facing) {
+      case Direction.down: dashDir.y = 1; break;
+      case Direction.up: dashDir.y = -1; break;
+      case Direction.left: dashDir.x = -1; break;
+      case Direction.right: dashDir.x = 1; break;
+    }
+    _velocity.setFrom(dashDir * (GameConstants.playerRunSpeed * 1.8));
+    return true;
+  }
+
   void performAction(FarmerTool tool) {
     if (isPerformingAction) return;
 
@@ -279,11 +302,35 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
       case FarmerTool.sickle:
         game.playSFX(GameConstants.sfxToolSwing);
         game.gameState.useEnergy(1.0);
+
+        // Spawn Melee Slash Arc
+        game.world.add(SlashArcComponent(position: targetPos));
+
+        // Knockback direction
+        final knockback = Vector2.zero();
         switch (facing) {
-          case Direction.down: current = PlayerState.swordDown; break;
-          case Direction.up: current = PlayerState.swordUp; break;
-          case Direction.left: current = PlayerState.swordLeft; break;
-          case Direction.right: current = PlayerState.swordRight; break;
+          case Direction.down: knockback.y = 1; current = PlayerState.swordDown; break;
+          case Direction.up: knockback.y = -1; current = PlayerState.swordUp; break;
+          case Direction.left: knockback.x = -1; current = PlayerState.swordLeft; break;
+          case Direction.right: knockback.x = 1; current = PlayerState.swordRight; break;
+        }
+
+        // Hit monsters in range
+        final meleeDamage = game.combat.calculateMeleeDamage();
+        for (final monster in game.world.children.whereType<MonsterComponent>()) {
+          if ((monster.position - targetPos).length <= 28.0) {
+            monster.takeDamage(meleeDamage, knockback);
+          }
+        }
+
+        // If equipped with Runic Staff, fire magic projectile
+        if (game.combat.equipment.weapon?.id == 'weapon_runic_staff') {
+          game.playSFX(GameConstants.sfxMagicCast);
+          game.world.add(MagicProjectileComponent(
+            position: position.clone(),
+            velocity: knockback * 200.0,
+            damage: game.combat.calculateMagicDamage(),
+          ));
         }
         break;
       case FarmerTool.hands:
@@ -310,6 +357,18 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
   @override
   void update(double dt) {
     super.update(dt);
+
+    if (_dashCooldown > 0) _dashCooldown -= dt;
+
+    if (_isDashing) {
+      _dashTimer -= dt;
+      position.add(_velocity * dt);
+      if (_dashTimer <= 0) {
+        _isDashing = false;
+        _velocity.setZero();
+      }
+      return;
+    }
 
     if (isPerformingAction) {
       _actionTimer -= dt;

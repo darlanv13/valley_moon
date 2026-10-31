@@ -263,9 +263,25 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void damagePlayer(double amount) {
+    health = (health - amount).clamp(0.0, maxHealth);
+    if (health <= 0) {
+      onPlayerFainted?.call();
+      advanceDay(exhausted: true);
+    }
+    notifyListeners();
+  }
+
   void addCoins(int amount) {
     coins += amount;
     notifyListeners();
+  }
+
+  bool spendCoins(int amount) {
+    if (coins < amount) return false;
+    coins -= amount;
+    notifyListeners();
+    return true;
   }
 
   void addItem(String item, int count) {

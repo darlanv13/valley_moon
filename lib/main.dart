@@ -7,6 +7,7 @@ import 'models/npc_dialogue_system.dart';
 import 'ui/dialogue_dialog.dart';
 import 'ui/diary_and_altars_dialog.dart';
 import 'ui/fishing_minigame_dialog.dart';
+import 'ui/forge_dialog.dart';
 import 'ui/hud_overlay.dart';
 import 'ui/inventory_dialog.dart';
 
@@ -62,6 +63,10 @@ class ValleyMoonApp extends StatelessWidget {
                 onClose: () => game.overlays.remove('FishingMinigame'),
               );
             },
+            'Forge': (context, game) => ForgeDialog(
+                  game: game,
+                  onClose: () => game.overlays.remove('Forge'),
+                ),
           },
           initialActiveOverlays: const ['HUD'],
         ),

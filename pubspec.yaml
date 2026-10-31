@@ -36,6 +36,9 @@ flutter:
     - assets/images/characters/
     - assets/images/animals/
     - assets/images/fishing/
+    - assets/images/cave/
+    - assets/images/monsters/
+    - assets/images/equipment/
     - assets/images/ui/
     - assets/tiles/
     - assets/audio/
