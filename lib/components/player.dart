@@ -7,6 +7,7 @@ import '../game/valley_moon_game.dart';
 import '../models/time_system.dart';
 import 'animal_component.dart';
 import 'combat_and_mine_components.dart';
+import 'farm_tile.dart';
 import 'npc_component.dart';
 import 'obstacle.dart';
 import 'shader_effects_manager.dart';
@@ -61,6 +62,92 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
   bool _isDashing = false;
   double _dashTimer = 0.0;
   double _dashCooldown = 0.0;
+
+  Vector2? _targetTapPosition;
+
+  void walkTo(Vector2 worldTarget) {
+    _targetTapPosition = worldTarget.clone();
+    game.settings.registerPlayerActivity();
+  }
+
+  void stopMoving() {
+    _targetTapPosition = null;
+    _velocity.setZero();
+  }
+
+  /// Context-sensitive Smart Tap:
+  /// - Tapping an adjacent interactable resource/soil/NPC uses the appropriate tool or interacts.
+  /// - Tapping an empty space walks smoothly towards that location.
+  void smartTap(Vector2 worldTarget) {
+    game.gamepad.setTouchMode();
+    game.settings.registerPlayerActivity();
+
+    final dist = (worldTarget - position).length;
+
+    // 1. If tapping nearby (within ~48px), interact with tile/entity directly
+    if (dist <= 52.0) {
+      // Face target
+      final diff = worldTarget - position;
+      if (diff.x.abs() > diff.y.abs()) {
+        facing = diff.x > 0 ? Direction.right : Direction.left;
+      } else {
+        facing = diff.y > 0 ? Direction.down : Direction.up;
+      }
+
+      // Check Obstacle (Tree, Stump, Rock)
+      for (final obs in game.world.children.whereType<ObstacleComponent>()) {
+        if ((obs.position - worldTarget).length <= 26.0) {
+          final nameLower = obs.obstacleName.toLowerCase();
+          if (nameLower.contains('rock') || nameLower.contains('pedra') || nameLower.contains('mine')) {
+            game.gameState.selectTool(FarmerTool.pickaxe);
+            performAction(FarmerTool.pickaxe);
+            return;
+          } else if (nameLower.contains('tree') || nameLower.contains('arvore') || nameLower.contains('tronco') || nameLower.contains('stump')) {
+            game.gameState.selectTool(FarmerTool.axe);
+            performAction(FarmerTool.axe);
+            return;
+          }
+        }
+      }
+
+      // Check Farm Tile
+      final gx = (worldTarget.x / GameConstants.tileSize).floor();
+      final gy = (worldTarget.y / GameConstants.tileSize).floor();
+      final tile = game.farmGrid.tiles['$gx,$gy'];
+      if (tile != null) {
+        if (tile.crop != null && tile.crop!.isMature) {
+          game.gameState.selectTool(FarmerTool.sickle);
+          performAction(FarmerTool.sickle);
+          return;
+        } else if (tile.soilState == TileSoilState.unplowed) {
+          game.gameState.selectTool(FarmerTool.hoe);
+          performAction(FarmerTool.hoe);
+          return;
+        } else if (tile.soilState == TileSoilState.plowedDry) {
+          game.gameState.selectTool(FarmerTool.wateringCan);
+          performAction(FarmerTool.wateringCan);
+          return;
+        }
+      }
+
+      // Check nearby NPC or Animal
+      for (final npc in game.world.children.whereType<NpcComponent>()) {
+        if ((npc.position - worldTarget).length <= 32.0) {
+          npc.interact();
+          return;
+        }
+      }
+      for (final a in game.world.children.whereType<AnimalComponent>()) {
+        if ((a.position - worldTarget).length <= 32.0) {
+          a.interact();
+          return;
+        }
+      }
+    }
+
+    // 2. Empty ground: walk towards destination
+    walkTo(worldTarget);
+  }
 
   bool get isInvincible => _isDashing;
 
@@ -277,41 +364,49 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
       case FarmerTool.axe:
         game.playSFX(GameConstants.sfxChop);
         game.gameState.useEnergy(2.0);
-        switch (facing) {
-          case Direction.down: current = PlayerState.axeDown; break;
-          case Direction.up: current = PlayerState.axeUp; break;
-          case Direction.left: current = PlayerState.axeLeft; break;
-          case Direction.right: current = PlayerState.axeRight; break;
+        if (animations != null) {
+          switch (facing) {
+            case Direction.down: current = PlayerState.axeDown; break;
+            case Direction.up: current = PlayerState.axeUp; break;
+            case Direction.left: current = PlayerState.axeLeft; break;
+            case Direction.right: current = PlayerState.axeRight; break;
+          }
         }
         break;
       case FarmerTool.hoe:
         game.playSFX(GameConstants.sfxToolSwing);
         game.gameState.useEnergy(1.5);
-        switch (facing) {
-          case Direction.down: current = PlayerState.hoeDown; break;
-          case Direction.up: current = PlayerState.hoeUp; break;
-          case Direction.left: current = PlayerState.hoeLeft; break;
-          case Direction.right: current = PlayerState.hoeRight; break;
+        if (animations != null) {
+          switch (facing) {
+            case Direction.down: current = PlayerState.hoeDown; break;
+            case Direction.up: current = PlayerState.hoeUp; break;
+            case Direction.left: current = PlayerState.hoeLeft; break;
+            case Direction.right: current = PlayerState.hoeRight; break;
+          }
         }
         break;
       case FarmerTool.wateringCan:
         game.playSFX(GameConstants.sfxToolSwing);
         game.gameState.useEnergy(1.0);
-        switch (facing) {
-          case Direction.down: current = PlayerState.waterDown; break;
-          case Direction.up: current = PlayerState.waterUp; break;
-          case Direction.left: current = PlayerState.waterLeft; break;
-          case Direction.right: current = PlayerState.waterRight; break;
+        if (animations != null) {
+          switch (facing) {
+            case Direction.down: current = PlayerState.waterDown; break;
+            case Direction.up: current = PlayerState.waterUp; break;
+            case Direction.left: current = PlayerState.waterLeft; break;
+            case Direction.right: current = PlayerState.waterRight; break;
+          }
         }
         break;
       case FarmerTool.pickaxe:
         game.playSFX(GameConstants.sfxChop);
         game.gameState.useEnergy(2.0);
-        switch (facing) {
-          case Direction.down: current = PlayerState.pickaxeDown; break;
-          case Direction.up: current = PlayerState.pickaxeUp; break;
-          case Direction.left: current = PlayerState.pickaxeLeft; break;
-          case Direction.right: current = PlayerState.pickaxeRight; break;
+        if (animations != null) {
+          switch (facing) {
+            case Direction.down: current = PlayerState.pickaxeDown; break;
+            case Direction.up: current = PlayerState.pickaxeUp; break;
+            case Direction.left: current = PlayerState.pickaxeLeft; break;
+            case Direction.right: current = PlayerState.pickaxeRight; break;
+          }
         }
         break;
       case FarmerTool.sword:
@@ -325,10 +420,10 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
         // Knockback direction
         final knockback = Vector2.zero();
         switch (facing) {
-          case Direction.down: knockback.y = 1; current = PlayerState.swordDown; break;
-          case Direction.up: knockback.y = -1; current = PlayerState.swordUp; break;
-          case Direction.left: knockback.x = -1; current = PlayerState.swordLeft; break;
-          case Direction.right: knockback.x = 1; current = PlayerState.swordRight; break;
+          case Direction.down: knockback.y = 1; if (animations != null) current = PlayerState.swordDown; break;
+          case Direction.up: knockback.y = -1; if (animations != null) current = PlayerState.swordUp; break;
+          case Direction.left: knockback.x = -1; if (animations != null) current = PlayerState.swordLeft; break;
+          case Direction.right: knockback.x = 1; if (animations != null) current = PlayerState.swordRight; break;
         }
 
         // Hit monsters in range
@@ -360,11 +455,13 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
       case FarmerTool.placeScarecrow:
       case FarmerTool.placeRainTotem:
         game.playSFX(GameConstants.sfxToolSwing);
-        switch (facing) {
-          case Direction.down: current = PlayerState.hoeDown; break;
-          case Direction.up: current = PlayerState.hoeUp; break;
-          case Direction.left: current = PlayerState.hoeLeft; break;
-          case Direction.right: current = PlayerState.hoeRight; break;
+        if (animations != null) {
+          switch (facing) {
+            case Direction.down: current = PlayerState.hoeDown; break;
+            case Direction.up: current = PlayerState.hoeUp; break;
+            case Direction.left: current = PlayerState.hoeLeft; break;
+            case Direction.right: current = PlayerState.hoeRight; break;
+          }
         }
         break;
     }
@@ -395,13 +492,33 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
       return;
     }
 
-    // Determine movement direction: Combine keyboard and virtual joystick
+    // Determine movement direction: Combine Smart Tap, Gamepad, Virtual Joystick and Keyboard
     final moveDir = Vector2.zero();
 
-    // Check joystick first
-    if (game.joystick != null && !game.joystick!.relativeDelta.isZero()) {
+    // 1. Smart Tap-to-move path
+    if (_targetTapPosition != null) {
+      final diff = _targetTapPosition! - position;
+      if (diff.length > 5.0) {
+        moveDir.setFrom(diff.normalized());
+      } else {
+        _targetTapPosition = null;
+        _velocity.setZero();
+      }
+    }
+
+    // 2. Physical Gamepad Analog Stick / D-Pad
+    if (!game.gamepad.leftStickDirection.isZero()) {
+      _targetTapPosition = null;
+      moveDir.setFrom(game.gamepad.leftStickDirection);
+    }
+    // 3. Virtual Touch Joystick
+    else if (game.joystick != null && !game.joystick!.relativeDelta.isZero()) {
+      _targetTapPosition = null;
       moveDir.setFrom(game.joystick!.relativeDelta);
-    } else {
+    }
+    // 4. Keyboard Arrow / WASD keys
+    else if (!_keyboardDirection.isZero()) {
+      _targetTapPosition = null;
       moveDir.setFrom(_keyboardDirection);
     }
 
@@ -447,19 +564,21 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
     }
 
     // Assign appropriate animation state
-    if (isMoving) {
-      switch (facing) {
-        case Direction.down: current = PlayerState.walkDown; break;
-        case Direction.up: current = PlayerState.walkUp; break;
-        case Direction.left: current = PlayerState.walkLeft; break;
-        case Direction.right: current = PlayerState.walkRight; break;
-      }
-    } else {
-      switch (facing) {
-        case Direction.down: current = PlayerState.idleDown; break;
-        case Direction.up: current = PlayerState.idleUp; break;
-        case Direction.left: current = PlayerState.idleLeft; break;
-        case Direction.right: current = PlayerState.idleRight; break;
+    if (animations != null) {
+      if (isMoving) {
+        switch (facing) {
+          case Direction.down: current = PlayerState.walkDown; break;
+          case Direction.up: current = PlayerState.walkUp; break;
+          case Direction.left: current = PlayerState.walkLeft; break;
+          case Direction.right: current = PlayerState.walkRight; break;
+        }
+      } else {
+        switch (facing) {
+          case Direction.down: current = PlayerState.idleDown; break;
+          case Direction.up: current = PlayerState.idleUp; break;
+          case Direction.left: current = PlayerState.idleLeft; break;
+          case Direction.right: current = PlayerState.idleRight; break;
+        }
       }
     }
   }

@@ -87,5 +87,7 @@ class GameConstants {
   static const String artisanMachinesImg = 'artisan/artisan_machines.png';
   static const String artisanGoodsImg = 'artisan/artisan_goods.png';
   static const String titleLogoImg = 'ui/title_logo.png';
+  static const String gamepadButtonsImg = 'ui/gamepad_buttons.png';
+  static const String appIconImg = 'ui/app_icon.png';
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import '../game/valley_moon_game.dart';
+import '../models/gamepad_system.dart';
 import '../models/inventory_system.dart';
 import '../models/time_system.dart';
 
@@ -13,7 +14,7 @@ class HudOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge([game.gameState, game.inventory, game.combat, game.festivals, game.boss]),
+      listenable: Listenable.merge([game.gameState, game.inventory, game.combat, game.festivals, game.boss, game.gamepad]),
       builder: (context, _) {
         final state = game.gameState;
         final inv = game.inventory;
@@ -378,6 +379,31 @@ class HudOverlay extends StatelessWidget {
             ),
           ),
         ),
+        const SizedBox(width: 6),
+
+        // Settings & Accessibility Button
+        GestureDetector(
+          onTap: game.openSettings,
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: GameConstants.parchmentLight,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: GameConstants.rusticWood, width: 2.5),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black38,
+                  offset: Offset(1, 2),
+                  blurRadius: 3,
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Text('⚙️', style: TextStyle(fontSize: 18)),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -411,6 +437,31 @@ class HudOverlay extends StatelessWidget {
                 color: barColor,
                 borderRadius: BorderRadius.circular(2),
               ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 6),
+
+        // Settings & Accessibility Button
+        GestureDetector(
+          onTap: game.openSettings,
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: GameConstants.parchmentLight,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: GameConstants.rusticWood, width: 2.5),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black38,
+                  offset: Offset(1, 2),
+                  blurRadius: 3,
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Text('⚙️', style: TextStyle(fontSize: 18)),
             ),
           ),
         ),
@@ -639,6 +690,9 @@ class HudOverlay extends StatelessWidget {
   }
 
   Widget _buildActionButton(InventoryState inv) {
+    if (game.gamepad.activeInputMode == ActiveInputMode.gamepad) {
+      return _buildGamepadPromptBadge();
+    }
     final selectedStack = inv.selectedHotbarItem;
     final icon = selectedStack?.item.icon ?? '✋';
 
@@ -724,6 +778,125 @@ class HudOverlay extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ),
+        const SizedBox(width: 6),
+
+        // Settings & Accessibility Button
+        GestureDetector(
+          onTap: game.openSettings,
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: GameConstants.parchmentLight,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: GameConstants.rusticWood, width: 2.5),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black38,
+                  offset: Offset(1, 2),
+                  blurRadius: 3,
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Text('⚙️', style: TextStyle(fontSize: 18)),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGamepadPromptBadge() {
+    final brand = game.gamepad.controllerBrand;
+    final isPS = brand == ControllerBrand.playStation;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: GameConstants.parchmentLight,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: GameConstants.rusticWood, width: 2.5),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black45,
+            offset: Offset(2, 2),
+            blurRadius: 4,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildGamepadKeyHint(
+            label: isPS ? '✕' : 'A',
+            color: isPS ? const Color(0xFF2E6BB0) : const Color(0xFF2E7D32),
+            action: 'Usar',
+          ),
+          const SizedBox(width: 8),
+          _buildGamepadKeyHint(
+            label: isPS ? '□' : 'X',
+            color: isPS ? const Color(0xFFB02E8A) : const Color(0xFF1E88E5),
+            action: 'Atacar',
+          ),
+          const SizedBox(width: 8),
+          _buildGamepadKeyHint(
+            label: isPS ? '○' : 'B',
+            color: const Color(0xFFD32F2F),
+            action: 'Esquivar',
+          ),
+          const SizedBox(width: 8),
+          _buildGamepadKeyHint(
+            label: isPS ? '△' : 'Y',
+            color: isPS ? const Color(0xFF2E7D32) : const Color(0xFFF9A825),
+            action: 'Mochila',
+          ),
+          const SizedBox(width: 8),
+          _buildGamepadKeyHint(
+            label: isPS ? 'L1/R1' : 'LB/RB',
+            color: GameConstants.rusticWoodDark,
+            action: 'Hotbar',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGamepadKeyHint({
+    required String label,
+    required Color color,
+    required String action,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: Colors.white70, width: 1),
+          ),
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontFamily: GameConstants.fontPixel,
+              fontSize: 8,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        const SizedBox(width: 3),
+        Text(
+          action,
+          style: const TextStyle(
+            fontFamily: GameConstants.fontPixel,
+            fontSize: 7,
+            fontWeight: FontWeight.bold,
+            color: GameConstants.rusticWoodDark,
           ),
         ),
       ],

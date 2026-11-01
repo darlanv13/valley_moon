@@ -22,3 +22,4 @@ void main() {
 
     fragColor = color;
 }
+

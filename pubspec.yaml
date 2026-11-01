@@ -19,11 +19,13 @@ dependencies:
   hive_flutter: ^1.1.0
   path_provider: ^2.1.6
   google_fonts: ^8.2.1
+  gamepads: ^0.1.13
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
@@ -56,3 +58,13 @@ flutter:
     - family: PressStart2P
       fonts:
         - asset: assets/fonts/PressStart2P.ttf
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/ui/app_icon.png"
+  windows:
+    generate: true
+    image_path: "assets/images/ui/app_icon.png"
+    icon_size: 256
+

@@ -28,6 +28,7 @@ import '../models/cabin_and_family_system.dart';
 import '../models/combat_and_mining_system.dart';
 import '../models/festival_system.dart';
 import '../models/fishing_system.dart';
+import '../models/gamepad_system.dart';
 import '../models/inventory_system.dart';
 import '../models/npc_dialogue_system.dart';
 import '../models/save_system.dart';
@@ -36,13 +37,14 @@ import '../models/time_system.dart';
 
 /// The central game class for Valley Moon.
 class ValleyMoonGame extends FlameGame
-    with HasCollisionDetection, HasKeyboardHandlerComponents {
+    with HasCollisionDetection, HasKeyboardHandlerComponents, TapCallbacks {
   late final FarmWorldComponent farmWorld;
   late final FarmGridManager farmGrid;
   late final PlayerComponent player;
   late final LightingOverlayComponent lightingOverlay;
   late final WeatherParticlesComponent weatherParticles;
   late final TimeManagerComponent timeManager;
+  late final GamepadSystem gamepad = GamepadSystem(game: this);
   JoystickComponent? joystick;
 
   final GameState gameState = GameState();
@@ -260,6 +262,24 @@ class ValleyMoonGame extends FlameGame
     );
 
     camera.viewport.add(joystick!);
+    gamepad.addListener(_updateJoystickVisibility);
+  }
+
+  void _updateJoystickVisibility() {
+    if (joystick == null) return;
+    final isGamepad = gamepad.activeInputMode == ActiveInputMode.gamepad;
+    if (isGamepad && joystick!.isMounted) {
+      joystick!.removeFromParent();
+    } else if (!isGamepad && !joystick!.isMounted) {
+      camera.viewport.add(joystick!);
+    }
+  }
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    super.onTapDown(event);
+    final worldPos = camera.globalToLocal(event.localPosition);
+    player.smartTap(worldPos);
   }
 
   void playBGM(String track) {

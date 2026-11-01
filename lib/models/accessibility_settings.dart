@@ -153,3 +153,4 @@ class AccessibilitySettings extends ChangeNotifier {
     notifyListeners();
   }
 }
+
