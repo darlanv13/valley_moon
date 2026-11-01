@@ -12,6 +12,15 @@ class TimeManagerComponent extends Component
   @override
   void update(double dt) {
     super.update(dt);
+
+    // Update inactivity check for casual auto-pause
+    game.settings.updateIdleCheck(dt);
+
+    if (game.settings.isAutoPaused) {
+      // Inactivity auto-pause: clock progression paused to relieve player stress
+      return;
+    }
+
     game.gameState.updateTime(dt);
 
     final isNight = game.gameState.isNight;

@@ -48,6 +48,10 @@ flutter:
     - assets/audio/
     - assets/fonts/
 
+  shaders:
+    - assets/shaders/water_distortion.frag
+    - assets/shaders/wind_foliage.frag
+
   fonts:
     - family: PressStart2P
       fonts:

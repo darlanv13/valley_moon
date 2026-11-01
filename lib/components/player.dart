@@ -9,6 +9,7 @@ import 'animal_component.dart';
 import 'combat_and_mine_components.dart';
 import 'npc_component.dart';
 import 'obstacle.dart';
+import 'shader_effects_manager.dart';
 
 enum Direction { down, up, left, right }
 
@@ -218,10 +219,23 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
       case Direction.right: dashDir.x = 1; break;
     }
     _velocity.setFrom(dashDir * (GameConstants.playerRunSpeed * 1.8));
+
+    // Spawn dust puff particles
+    for (final p in game.world.children.whereType<PlayerReactiveParticlesComponent>()) {
+      p.spawnDashDust(position, dashDir);
+    }
+
+    // Camera screen shake if enabled
+    if (game.settings.enableScreenShake) {
+      game.triggerScreenShake(duration: 0.15, intensity: 2.5);
+    }
+
+    game.settings.registerPlayerActivity();
     return true;
   }
 
   void performAction(FarmerTool tool) {
+    game.settings.registerPlayerActivity();
     if (isPerformingAction) return;
 
     // Check if player is near any NPC or Animal when interacting with hands or brush

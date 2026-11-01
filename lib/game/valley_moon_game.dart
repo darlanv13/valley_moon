@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/experimental.dart';
@@ -14,10 +15,12 @@ import '../components/lighting_and_weather.dart';
 import '../components/map_transition.dart';
 import '../components/npc_component.dart';
 import '../components/player.dart';
+import '../components/shader_effects_manager.dart';
 import '../components/spouse_and_child_components.dart';
 import '../components/time_manager.dart';
 import '../core/audio_manager.dart';
 import '../core/constants.dart';
+import '../models/accessibility_settings.dart';
 import '../models/act3_boss_system.dart';
 import '../models/animal_system.dart';
 import '../models/artisan_system.dart';
@@ -54,7 +57,18 @@ class ValleyMoonGame extends FlameGame
   final Act3BossState boss = Act3BossState();
   final CabinAndFamilyManager family = CabinAndFamilyManager();
   final ArtisanManager artisan = ArtisanManager();
+  final AccessibilitySettings settings = AccessibilitySettings();
   FestivalType? activeFestival;
+
+  double _screenShakeTimer = 0.0;
+  double _screenShakeIntensity = 0.0;
+  final Random _shakeRng = Random();
+
+  void triggerScreenShake({double duration = 0.2, double intensity = 3.0}) {
+    if (!settings.enableScreenShake) return;
+    _screenShakeTimer = duration;
+    _screenShakeIntensity = intensity;
+  }
 
   GameLocation currentLocation = GameLocation.farm;
   NpcId? activeDialogueNpc;
@@ -136,6 +150,15 @@ class ValleyMoonGame extends FlameGame
     for (final machine in artisan.machines) {
       await world.add(ArtisanMachineComponent(machine: machine));
     }
+
+    // 10.3 Add GLSL Water Distortion Shader Overlay
+    await world.add(WaterDistortionOverlayComponent());
+
+    // 10.4 Add Player Reactive Particles (Snow Footsteps & Dash Dust)
+    await world.add(PlayerReactiveParticlesComponent());
+
+    // 10.5 Add Volumetric Lighting & Evening Fireflies
+    await world.add(VolumetricLightingAndFirefliesComponent());
 
     // 11. Connect Reactive Hooks for Animals & Relationships
     gameState.onNewDayStarted = () {
@@ -370,6 +393,29 @@ class ValleyMoonGame extends FlameGame
     }
   }
 
+  void openSettings() {
+    if (overlays.isActive('Settings')) {
+      overlays.remove('Settings');
+    } else {
+      try {
+        overlays.add('Settings');
+      } catch (_) {}
+    }
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (_screenShakeTimer > 0) {
+      _screenShakeTimer -= dt;
+      final ox = (_shakeRng.nextDouble() - 0.5) * 2 * _screenShakeIntensity;
+      final oy = (_shakeRng.nextDouble() - 0.5) * 2 * _screenShakeIntensity;
+      try {
+        camera.viewfinder.position = player.position + Vector2(ox, oy);
+      } catch (_) {}
+    }
+  }
+
   void startFishing([FishData? customFish]) {
     if (customFish != null) {
       activeFishingFish = customFish;
@@ -403,6 +449,8 @@ class ValleyMoonGame extends FlameGame
     KeyEvent event,
     Set<LogicalKeyboardKey> keysPressed,
   ) {
+    settings.registerPlayerActivity();
+
     if (event is KeyDownEvent) {
       // Toggle Inventory Modal with 'I' or 'B'
       if (event.logicalKey == LogicalKeyboardKey.keyI ||
@@ -453,6 +501,12 @@ class ValleyMoonGame extends FlameGame
         return KeyEventResult.handled;
       }
 
+      // Open Settings & Accessibility with 'O'
+      if (event.logicalKey == LogicalKeyboardKey.keyO) {
+        openSettings();
+        return KeyEventResult.handled;
+      }
+
       // Interact with nearby NPC, Farm Animal, Spouse, Child, or Machine with 'E' or 'Enter'
       if (event.logicalKey == LogicalKeyboardKey.keyE ||
           event.logicalKey == LogicalKeyboardKey.enter) {
@@ -490,6 +544,7 @@ class ValleyMoonGame extends FlameGame
 
       // Close modal on Escape
       if (event.logicalKey == LogicalKeyboardKey.escape) {
+        if (overlays.isActive('Settings')) overlays.remove('Settings');
         if (overlays.isActive('Carpenter')) overlays.remove('Carpenter');
         if (overlays.isActive('Kitchen')) overlays.remove('Kitchen');
         if (overlays.isActive('Act3Victory')) overlays.remove('Act3Victory');

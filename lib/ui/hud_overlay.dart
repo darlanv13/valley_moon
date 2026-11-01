@@ -353,6 +353,31 @@ class HudOverlay extends StatelessWidget {
             ),
           ),
         ),
+        const SizedBox(width: 6),
+
+        // Settings & Accessibility Button
+        GestureDetector(
+          onTap: game.openSettings,
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: GameConstants.parchmentLight,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: GameConstants.rusticWood, width: 2.5),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black38,
+                  offset: Offset(1, 2),
+                  blurRadius: 3,
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Text('⚙️', style: TextStyle(fontSize: 18)),
+            ),
+          ),
+        ),
       ],
     );
   }

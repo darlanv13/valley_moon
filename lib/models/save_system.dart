@@ -135,6 +135,9 @@ class SaveManager {
       // 10. Stage 8: Cabin Upgrades, Marriage, Children & Artisan Machines
       'family': game.family.toJson(),
       'artisan': game.artisan.toJsonList(),
+
+      // 11. Stage 9: Accessibility, Shaders & Visual Quality
+      'settings': game.settings.toJson(),
     };
 
     try {
@@ -235,6 +238,12 @@ class SaveManager {
       final art = data['artisan'] as List<dynamic>?;
       if (art != null) {
         game.artisan.loadFromJsonList(art);
+      }
+
+      // 8. Restore Accessibility & Visual Settings
+      final st = data['settings'] as Map<String, dynamic>?;
+      if (st != null) {
+        game.settings.loadFromJson(st);
       }
 
       return true;
