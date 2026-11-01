@@ -84,6 +84,23 @@ class ValleyMoonApp extends StatelessWidget {
                   game: game,
                   onStartGame: () => game.overlays.remove('Title'),
                 ),
+            'Forge': (context, game) => ForgeDialog(
+                  game: game,
+                  onClose: () => game.overlays.remove('Forge'),
+                ),
+            'Festival': (context, game) => FestivalDialog(
+                  game: game,
+                  festival: game.activeFestival ?? FestivalType.firstSeed,
+                  onClose: () => game.overlays.remove('Festival'),
+                ),
+            'Act3Victory': (context, game) => Act3VictoryDialog(
+                  game: game,
+                  onClose: () => game.overlays.remove('Act3Victory'),
+                ),
+            'Title': (context, game) => TitleScreenOverlay(
+                  game: game,
+                  onStartGame: () => game.overlays.remove('Title'),
+                ),
           },
           initialActiveOverlays: const ['HUD', 'Title'],
         ),

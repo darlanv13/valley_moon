@@ -352,3 +352,4 @@ if __name__ == '__main__':
     create_pet()
     create_heart_emote()
     print("All animal assets successfully generated!")
+

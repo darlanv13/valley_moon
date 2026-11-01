@@ -223,3 +223,4 @@ class FishData {
     return eligible[rand.nextInt(eligible.length)];
   }
 }
+

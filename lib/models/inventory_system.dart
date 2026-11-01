@@ -11,6 +11,9 @@ enum ItemCategory {
   fish,
   equipment,
   ore,
+  fish,
+  equipment,
+  ore,
 }
 
 enum EquipmentSlot {
@@ -298,6 +301,385 @@ class GameItem {
     icon: '🗿',
     category: ItemCategory.craftable,
     associatedTool: FarmerTool.placeRainTotem,
+  );
+
+  // Animal Produce
+  static const GameItem egg = GameItem(
+    id: 'produce_egg',
+    name: 'Ovo Caipira',
+    description: 'Ovo fresco colhido de galinhas bem cuidadas.',
+    icon: '🥚',
+    category: ItemCategory.consumable,
+    sellPrice: 40,
+    energyRestore: 15.0,
+  );
+
+  static const GameItem milk = GameItem(
+    id: 'produce_milk',
+    name: 'Leite Fresco',
+    description: 'Leite cremoso ordenhado ao amanhecer.',
+    icon: '🥛',
+    category: ItemCategory.consumable,
+    sellPrice: 75,
+    energyRestore: 25.0,
+  );
+
+  static const GameItem wool = GameItem(
+    id: 'produce_wool',
+    name: 'Lã Macia',
+    description: 'Fardo de lã macia tosquiada com carinho.',
+    icon: '🧶',
+    category: ItemCategory.material,
+    sellPrice: 90,
+  );
+
+  static const GameItem truffle = GameItem(
+    id: 'produce_truffle',
+    name: 'Trufa da Floresta',
+    description: 'Fungo aromático desenterrado por porcos em solo fértil.',
+    icon: '🍄',
+    category: ItemCategory.consumable,
+    sellPrice: 150,
+    energyRestore: 30.0,
+  );
+
+  // Mystical Animal Produce
+  static const GameItem amberEgg = GameItem(
+    id: 'produce_amber_egg',
+    name: 'Ovo de Âmbar Místico',
+    description: 'Ovo translúcido reluzente com calor solar puro da Galinha de Âmbar.',
+    icon: '✨🥚',
+    category: ItemCategory.consumable,
+    sellPrice: 280,
+    energyRestore: 50.0,
+  );
+
+  static const GameItem vitalDew = GameItem(
+    id: 'produce_vital_dew',
+    name: 'Orvalho Vital do Musgo',
+    description: 'Gota etérea colhida do Bezerro-Musgo. Restaura 80 HP.',
+    icon: '🌿💧',
+    category: ItemCategory.potion,
+    sellPrice: 320,
+    healthRestore: 80.0,
+  );
+
+  static const GameItem floatingWool = GameItem(
+    id: 'produce_floating_wool',
+    name: 'Lã Flutuante Celeste',
+    description: 'Lã levitante como brisa azulada da Ovelha-Nuvem.',
+    icon: '☁️🧶',
+    category: ItemCategory.material,
+    sellPrice: 350,
+  );
+
+  // Fish Species
+  static const GameItem brookTrout = GameItem(
+    id: 'fish_brook_trout',
+    name: 'Truta do Riacho',
+    description: 'Peixe ágil com manchas douradas e cobreadas que habita águas límpidas.',
+    icon: '🐟',
+    category: ItemCategory.fish,
+    sellPrice: 65,
+    energyRestore: 20.0,
+  );
+
+  static const GameItem pondTilapia = GameItem(
+    id: 'fish_pond_tilapia',
+    name: 'Tilápia da Lagoa',
+    description: 'Peixe de escamas azuladas que nada em lagos serenos.',
+    icon: '🐠',
+    category: ItemCategory.fish,
+    sellPrice: 75,
+    energyRestore: 22.0,
+  );
+
+  static const GameItem pierCatfish = GameItem(
+    id: 'fish_pier_catfish',
+    name: 'Bagre do Píer',
+    description: 'Peixe corpulento de bigodes longos encontrado perto do píer.',
+    icon: '🐡',
+    category: ItemCategory.fish,
+    sellPrice: 95,
+    energyRestore: 28.0,
+  );
+
+  static const GameItem nightEel = GameItem(
+    id: 'fish_night_eel',
+    name: 'Enguia Noturna',
+    description: 'Enguia escura como a noite com barbatana amarela elétrica.',
+    icon: '🐍',
+    category: ItemCategory.fish,
+    sellPrice: 140,
+    energyRestore: 35.0,
+  );
+
+  // Legendary Fish Species
+  static const GameItem phantomCatfish = GameItem(
+    id: 'fish_phantom_catfish',
+    name: 'Bagre-Fantasma [Lendário]',
+    description: 'Lenda das cavernas: peixe translúcido que só morde em noites de neblina.',
+    icon: '👻🐟',
+    category: ItemCategory.fish,
+    sellPrice: 600,
+    energyRestore: 80.0,
+    healthRestore: 50.0,
+  );
+
+  static const GameItem astralCarp = GameItem(
+    id: 'fish_astral_carp',
+    name: 'Carpa Astral [Lendária]',
+    description: 'Guardiã cósmica do lago da floresta sob a luz da Lua Cheia.',
+    icon: '⭐🐟',
+    category: ItemCategory.fish,
+    sellPrice: 750,
+    energyRestore: 100.0,
+    healthRestore: 70.0,
+  );
+
+  static const GameItem moonlightSalmon = GameItem(
+    id: 'fish_moonlight_salmon',
+    name: 'Salmão do Luar [Lendário]',
+    description: 'Salmão prateado que sobe as correntes sob o luar sereno.',
+    icon: '🌙🐟',
+    category: ItemCategory.fish,
+    sellPrice: 850,
+    energyRestore: 90.0,
+    healthRestore: 60.0,
+  );
+
+  static const GameItem goldenSunfish = GameItem(
+    id: 'fish_golden_sunfish',
+    name: 'Peixe-Sol Dourado [Lendário]',
+    description: 'Criatura solar rara vista apenas em dias límpidos e quentes no píer.',
+    icon: '☀️🐟',
+    category: ItemCategory.fish,
+    sellPrice: 1000,
+    energyRestore: 120.0,
+    healthRestore: 90.0,
+  );
+
+  // Mining Ores & Gems
+  static const GameItem copperOre = GameItem(
+    id: 'ore_copper',
+    name: 'Minério de Cobre',
+    description: 'Nódulo avermelhado de cobre extraído das galerias superiores.',
+    icon: '🟤',
+    category: ItemCategory.ore,
+    sellPrice: 15,
+  );
+
+  static const GameItem ironOre = GameItem(
+    id: 'ore_iron',
+    name: 'Minério de Ferro',
+    description: 'Bloco denso de ferro das profundezas rochosas da mina.',
+    icon: '⚪',
+    category: ItemCategory.ore,
+    sellPrice: 30,
+  );
+
+  static const GameItem silverOre = GameItem(
+    id: 'ore_silver',
+    name: 'Minério de Prata',
+    description: 'Pepitas reluzentes de prata das fendas ancestrais.',
+    icon: '🔘',
+    category: ItemCategory.ore,
+    sellPrice: 60,
+  );
+
+  static const GameItem goldOre = GameItem(
+    id: 'ore_gold',
+    name: 'Minério de Ouro',
+    description: 'Minério brilhante extraído perto das câmaras de magma.',
+    icon: '🟡',
+    category: ItemCategory.ore,
+    sellPrice: 100,
+  );
+
+  static const GameItem lunarCrystal = GameItem(
+    id: 'gem_lunar_crystal',
+    name: 'Cristal Lunar Puro',
+    description: 'Gema bioluminescente rara que pulsa com a energia da Lua.',
+    icon: '💎',
+    category: ItemCategory.ore,
+    sellPrice: 250,
+  );
+
+  static const List<GameItem> allOres = [
+    copperOre,
+    ironOre,
+    silverOre,
+    goldOre,
+    lunarCrystal,
+  ];
+
+  static const GameItem caveGeode = GameItem(
+    id: 'mat_geode',
+    name: 'Geodo da Caverna',
+    description: 'Rocha esférica que esconde minérios preciosos em seu interior.',
+    icon: '🪨',
+    category: ItemCategory.material,
+    sellPrice: 50,
+  );
+
+  // Refined Metal Bars (Kael's Forge)
+  static const GameItem copperBar = GameItem(
+    id: 'bar_copper',
+    name: 'Barra de Cobre',
+    description: 'Lingote fundido de cobre para forjar ferramentas resistentes.',
+    icon: '🧱',
+    category: ItemCategory.material,
+    sellPrice: 80,
+  );
+
+  static const GameItem ironBar = GameItem(
+    id: 'bar_iron',
+    name: 'Barra de Ferro',
+    description: 'Barra forjada de ferro maciço para armas e reforços.',
+    icon: '⛓️',
+    category: ItemCategory.material,
+    sellPrice: 150,
+  );
+
+  static const GameItem silverBar = GameItem(
+    id: 'bar_silver',
+    name: 'Barra de Prata',
+    description: 'Lingote puro de prata com propriedades místicas de purificação.',
+    icon: '🪙',
+    category: ItemCategory.material,
+    sellPrice: 280,
+  );
+
+  static const GameItem goldBar = GameItem(
+    id: 'bar_gold',
+    name: 'Barra de Ouro',
+    description: 'Barra reluzente de ouro nobre para obras de mestre.',
+    icon: '🏆',
+    category: ItemCategory.material,
+    sellPrice: 450,
+  );
+
+  static const GameItem lunarIngot = GameItem(
+    id: 'bar_lunar',
+    name: 'Lingote Lunar Puro',
+    description: 'Fusão sagrada de ouro, cristal lunar e lágrimas da noite.',
+    icon: '✨🧱',
+    category: ItemCategory.material,
+    sellPrice: 900,
+  );
+
+  // Action RPG Weapons
+  static const GameItem copperBlade = GameItem(
+    id: 'weapon_copper_blade',
+    name: 'Lâmina de Cobre',
+    description: 'Espada ágil forjada por Kael. Desfere cortes rápidos na caverna.',
+    icon: '🗡️',
+    category: ItemCategory.equipment,
+    equipmentSlot: EquipmentSlot.weapon,
+    attackDamage: 12,
+    sellPrice: 180,
+  );
+
+  static const GameItem ironClaymore = GameItem(
+    id: 'weapon_iron_claymore',
+    name: 'Espadão de Ferro da Guarda',
+    description: 'Lâmina pesada com alto poder de corte e forte repulsão (*knockback*).',
+    icon: '⚔️',
+    category: ItemCategory.equipment,
+    equipmentSlot: EquipmentSlot.weapon,
+    attackDamage: 22,
+    sellPrice: 380,
+  );
+
+  static const GameItem lunarCrescentBlade = GameItem(
+    id: 'weapon_lunar_sword',
+    name: 'Lâmina do Luar Carmesim',
+    description: 'Espada lendária forjada com cristal lunar. Dano massivo no escuro.',
+    icon: '🌙⚔️',
+    category: ItemCategory.equipment,
+    equipmentSlot: EquipmentSlot.weapon,
+    attackDamage: 45,
+    sellPrice: 1200,
+  );
+
+  static const GameItem runicStaff = GameItem(
+    id: 'weapon_runic_staff',
+    name: 'Cajado de Runas Ancestrais',
+    description: 'Cajado entalhado que dispara projéteis de magia rúnica à distância.',
+    icon: '🪄',
+    category: ItemCategory.equipment,
+    equipmentSlot: EquipmentSlot.weapon,
+    attackDamage: 36,
+    sellPrice: 950,
+  );
+
+  // Boots & Armor
+  static const GameItem leatherBoots = GameItem(
+    id: 'boots_leather',
+    name: 'Botas de Couro Rústico',
+    description: 'Botas confortáveis. +2 Defesa e +10% de velocidade de movimento.',
+    icon: '🥾',
+    category: ItemCategory.equipment,
+    equipmentSlot: EquipmentSlot.boots,
+    defense: 2,
+    sellPrice: 120,
+  );
+
+  static const GameItem minerBoots = GameItem(
+    id: 'boots_miner',
+    name: 'Botas de Ferro do Minerador',
+    description: 'Botas reforçadas. +5 Defesa e imunidade à lentidão de lama e lava.',
+    icon: '👢',
+    category: ItemCategory.equipment,
+    equipmentSlot: EquipmentSlot.boots,
+    defense: 5,
+    sellPrice: 350,
+  );
+
+  static const GameItem featherBoots = GameItem(
+    id: 'boots_feather',
+    name: 'Botas de Pluma Celeste',
+    description: 'Tecidas com Lã Flutuante. +25% de velocidade e recarga rápida do Dash.',
+    icon: '🪶🥾',
+    category: ItemCategory.equipment,
+    equipmentSlot: EquipmentSlot.boots,
+    defense: 3,
+    sellPrice: 600,
+  );
+
+  // Runic Rings
+  static const GameItem vigorRing = GameItem(
+    id: 'ring_vigor',
+    name: 'Anel de Vigor da Terra',
+    description: 'Entalhado com runas verdes. +30 de Energia Máxima e regeneração.',
+    icon: '💍',
+    category: ItemCategory.equipment,
+    equipmentSlot: EquipmentSlot.ring,
+    defense: 1,
+    sellPrice: 250,
+  );
+
+  static const GameItem moonflowerRing = GameItem(
+    id: 'ring_moonflower',
+    name: 'Anel da Flor Lunar',
+    description: 'Brilha nas profundezas da mina. +20 de Vida Máxima e +15% de Dano.',
+    icon: '💠💍',
+    category: ItemCategory.equipment,
+    equipmentSlot: EquipmentSlot.ring,
+    attackDamage: 4,
+    defense: 2,
+    sellPrice: 450,
+  );
+
+  static const GameItem thornsRing = GameItem(
+    id: 'ring_thorns',
+    name: 'Anel de Espinhos da Floresta',
+    description: 'Espinhos protetores que refletem 30% do dano sofrido de volta aos monstros.',
+    icon: '🌿💍',
+    category: ItemCategory.equipment,
+    equipmentSlot: EquipmentSlot.ring,
+    defense: 3,
+    sellPrice: 500,
   );
 
   // Animal Produce

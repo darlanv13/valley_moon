@@ -272,3 +272,4 @@ img_logo.save("assets/images/ui/title_logo.png")
 print("Saved assets/images/ui/title_logo.png")
 
 print("All Stage 7 visual assets generated successfully!")
+

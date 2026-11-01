@@ -152,3 +152,4 @@ if __name__ == '__main__':
     create_rod()
     create_water_splash()
     print("All fishing assets successfully generated!")
+

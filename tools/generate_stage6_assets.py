@@ -198,3 +198,4 @@ if __name__ == '__main__':
     create_monsters()
     create_equipment()
     print("All Stage 6 assets created successfully!")
+

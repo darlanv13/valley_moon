@@ -244,3 +244,4 @@ class AnimalManager extends ChangeNotifier {
     notifyListeners();
   }
 }
+

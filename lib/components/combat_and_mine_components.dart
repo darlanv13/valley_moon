@@ -316,3 +316,4 @@ class MonsterComponent extends PositionComponent
     }
   }
 }
+
