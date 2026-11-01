@@ -131,6 +131,10 @@ class SaveManager {
         'attended': game.festivals.attendedFestivals.toList(),
         'buff': game.festivals.activeHarvestBuff?.name,
       },
+
+      // 10. Stage 8: Cabin Upgrades, Marriage, Children & Artisan Machines
+      'family': game.family.toJson(),
+      'artisan': game.artisan.toJsonList(),
     };
 
     try {
@@ -219,6 +223,18 @@ class SaveManager {
         if (attended != null) {
           game.festivals.attendedFestivals.addAll(attended.cast<String>());
         }
+      }
+
+      // 6. Restore Cabin & Family System
+      final fam = data['family'] as Map<String, dynamic>?;
+      if (fam != null) {
+        game.family.loadFromJson(fam);
+      }
+
+      // 7. Restore Artisan Machines
+      final art = data['artisan'] as List<dynamic>?;
+      if (art != null) {
+        game.artisan.loadFromJsonList(art);
       }
 
       return true;

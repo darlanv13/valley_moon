@@ -41,11 +41,8 @@ flutter:
     - assets/images/equipment/
     - assets/images/festivals/
     - assets/images/boss/
-    - assets/images/cave/
-    - assets/images/monsters/
-    - assets/images/equipment/
-    - assets/images/festivals/
-    - assets/images/boss/
+    - assets/images/cabin/
+    - assets/images/artisan/
     - assets/images/ui/
     - assets/tiles/
     - assets/audio/

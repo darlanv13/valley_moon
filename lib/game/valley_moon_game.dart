@@ -8,16 +8,20 @@ import '../components/animal_component.dart';
 import '../components/boss_component.dart';
 import '../components/combat_and_mine_components.dart';
 import '../components/farm_grid_manager.dart';
+import '../components/farm_tile.dart';
 import '../components/farm_world.dart';
 import '../components/lighting_and_weather.dart';
 import '../components/map_transition.dart';
 import '../components/npc_component.dart';
 import '../components/player.dart';
+import '../components/spouse_and_child_components.dart';
 import '../components/time_manager.dart';
 import '../core/audio_manager.dart';
 import '../core/constants.dart';
 import '../models/act3_boss_system.dart';
 import '../models/animal_system.dart';
+import '../models/artisan_system.dart';
+import '../models/cabin_and_family_system.dart';
 import '../models/combat_and_mining_system.dart';
 import '../models/festival_system.dart';
 import '../models/fishing_system.dart';
@@ -48,6 +52,8 @@ class ValleyMoonGame extends FlameGame
   final MineFloorManager mine = MineFloorManager();
   final FestivalManager festivals = FestivalManager();
   final Act3BossState boss = Act3BossState();
+  final CabinAndFamilyManager family = CabinAndFamilyManager();
+  final ArtisanManager artisan = ArtisanManager();
   FestivalType? activeFestival;
 
   GameLocation currentLocation = GameLocation.farm;
@@ -123,11 +129,37 @@ class ValleyMoonGame extends FlameGame
     timeManager = TimeManagerComponent();
     await add(timeManager);
 
+    // 10.1 Add Spouse & Children Components on the Farm
+    await world.add(SpouseComponent());
+
+    // 10.2 Add Rustic Artisan Machines
+    for (final machine in artisan.machines) {
+      await world.add(ArtisanMachineComponent(machine: machine));
+    }
+
     // 11. Connect Reactive Hooks for Animals & Relationships
     gameState.onNewDayStarted = () {
       animals.onNewDay();
       animals.updateWeatherAndShelter(gameState);
       relationships.onNewDay();
+      family.executeMorningRoutine(
+        onWaterCrops: (count) {
+          int watered = 0;
+          for (final tile in farmGrid.tiles.values) {
+            if (tile.crop != null && tile.soilState == TileSoilState.plowedDry) {
+              tile.water();
+              watered++;
+              if (watered >= count) break;
+            }
+          }
+        },
+        onFeedAnimals: () {
+          for (final a in animals.animals) {
+            a.isFed = true;
+          }
+        },
+      );
+      artisan.onNewDay();
       activeFestival = festivals.getActiveFestival(gameState.season, gameState.day);
       if (activeFestival != null) {
         playBGM(GameConstants.bgmFestival);
@@ -318,6 +350,26 @@ class ValleyMoonGame extends FlameGame
     }
   }
 
+  void openCarpenter() {
+    if (overlays.isActive('Carpenter')) {
+      overlays.remove('Carpenter');
+    } else {
+      try {
+        overlays.add('Carpenter');
+      } catch (_) {}
+    }
+  }
+
+  void openKitchen() {
+    if (overlays.isActive('Kitchen')) {
+      overlays.remove('Kitchen');
+    } else {
+      try {
+        overlays.add('Kitchen');
+      } catch (_) {}
+    }
+  }
+
   void startFishing([FishData? customFish]) {
     if (customFish != null) {
       activeFishingFish = customFish;
@@ -389,9 +441,39 @@ class ValleyMoonGame extends FlameGame
         return KeyEventResult.handled;
       }
 
-      // Interact with nearby NPC or Farm Animal with 'E' or 'Enter'
+      // Open Carpenter Shop with 'C'
+      if (event.logicalKey == LogicalKeyboardKey.keyC) {
+        openCarpenter();
+        return KeyEventResult.handled;
+      }
+
+      // Open Wood Stove Kitchen with 'X'
+      if (event.logicalKey == LogicalKeyboardKey.keyX) {
+        openKitchen();
+        return KeyEventResult.handled;
+      }
+
+      // Interact with nearby NPC, Farm Animal, Spouse, Child, or Machine with 'E' or 'Enter'
       if (event.logicalKey == LogicalKeyboardKey.keyE ||
           event.logicalKey == LogicalKeyboardKey.enter) {
+        for (final child in world.children.whereType<SpouseComponent>()) {
+          if (child.isPlayerNearby) {
+            child.interact();
+            return KeyEventResult.handled;
+          }
+        }
+        for (final child in world.children.whereType<ChildComponent>()) {
+          if (child.isPlayerNearby) {
+            child.interact();
+            return KeyEventResult.handled;
+          }
+        }
+        for (final child in world.children.whereType<ArtisanMachineComponent>()) {
+          if (child.isPlayerNearby) {
+            child.interact();
+            return KeyEventResult.handled;
+          }
+        }
         for (final child in world.children.whereType<NpcComponent>()) {
           if (child.isPlayerNearby) {
             child.interact();
@@ -408,6 +490,8 @@ class ValleyMoonGame extends FlameGame
 
       // Close modal on Escape
       if (event.logicalKey == LogicalKeyboardKey.escape) {
+        if (overlays.isActive('Carpenter')) overlays.remove('Carpenter');
+        if (overlays.isActive('Kitchen')) overlays.remove('Kitchen');
         if (overlays.isActive('Act3Victory')) overlays.remove('Act3Victory');
         if (overlays.isActive('Festival')) overlays.remove('Festival');
         if (overlays.isActive('Forge')) overlays.remove('Forge');

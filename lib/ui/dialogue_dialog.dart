@@ -406,9 +406,28 @@ class _DialogueDialogState extends State<DialogueDialog> {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             ),
             onPressed: () {
-              widget.game.relationships.proposeMarriage(widget.npcId);
-              ValleyMoonAudioManager().playSFX('chime.ogg');
-              _startTypewriter('Sim, sim! Eu me caso com você! Vamos cuidar deste vale juntos para sempre! 💍✨');
+              if (!widget.game.family.canMarry) {
+                _startTypewriter('Eu te amo muito, mas precisamos de um Quarto de Casal na sua cabana! Fale com o carpinteiro Robin na vila.');
+                setState(() {});
+                return;
+              }
+              if (widget.game.inventory.countOf('gift_moonflower_amulet') <= 0) {
+                _startTypewriter('Para selarmos nossa união sob a Lua, você precisa me entregar o sagrado Amuleto da Flor da Lua!');
+                setState(() {});
+                return;
+              }
+
+              final married = widget.game.family.marryNpc(
+                widget.npcId,
+                widget.game.relationships,
+                widget.game.gameState,
+                widget.game.inventory,
+              );
+
+              if (married) {
+                ValleyMoonAudioManager().playSFX('chime.ogg');
+                _startTypewriter('Sim, sim! Eu me caso com você! Vamos morar juntos na sua cabana e cuidar deste vale para sempre! 💍💖');
+              }
               setState(() {});
             },
             icon: const Text('💍', style: TextStyle(fontSize: 12)),

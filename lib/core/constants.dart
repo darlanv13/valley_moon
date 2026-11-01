@@ -62,6 +62,11 @@ class GameConstants {
   static const String sfxPurify = 'purify.ogg';
   static const String sfxBossRoar = 'boss_roar.ogg';
   static const String sfxVictory = 'victory_fanfare.ogg';
+  static const String sfxLoomSpin = 'loom_spin.ogg';
+  static const String sfxCarpenterHammer = 'carpenter_hammer.ogg';
+  static const String sfxBarrelBubble = 'barrel_bubble.ogg';
+  static const String sfxBabyGiggle = 'baby_giggle.ogg';
+  static const String sfxCookingSizzle = 'cooking_sizzle.ogg';
 
   // Crop, Magic, Mine, Monster & Festival Sprites
   static const String cropsSheet = 'tiles/crops.png';
@@ -77,6 +82,10 @@ class GameConstants {
   static const String corruptedGuardianImg = 'boss/corrupted_guardian.png';
   static const String grandfatherAmberImg = 'boss/grandfather_amber.png';
   static const String lunarTreeImg = 'boss/lunar_tree.png';
+  static const String cabinInteriorsImg = 'cabin/cabin_interiors.png';
+  static const String childrenSheet = 'characters/children.png';
+  static const String artisanMachinesImg = 'artisan/artisan_machines.png';
+  static const String artisanGoodsImg = 'artisan/artisan_goods.png';
   static const String titleLogoImg = 'ui/title_logo.png';
 }
 

@@ -6,6 +6,7 @@ import 'models/festival_system.dart';
 import 'models/fishing_system.dart';
 import 'models/npc_dialogue_system.dart';
 import 'ui/act3_dialog.dart';
+import 'ui/carpenter_dialog.dart';
 import 'ui/dialogue_dialog.dart';
 import 'ui/diary_and_altars_dialog.dart';
 import 'ui/festival_dialog.dart';
@@ -13,6 +14,7 @@ import 'ui/fishing_minigame_dialog.dart';
 import 'ui/forge_dialog.dart';
 import 'ui/hud_overlay.dart';
 import 'ui/inventory_dialog.dart';
+import 'ui/kitchen_dialog.dart';
 import 'ui/title_screen.dart';
 
 void main() {
@@ -70,6 +72,14 @@ class ValleyMoonApp extends StatelessWidget {
             'Forge': (context, game) => ForgeDialog(
                   game: game,
                   onClose: () => game.overlays.remove('Forge'),
+                ),
+            'Carpenter': (context, game) => CarpenterDialog(
+                  game: game,
+                  onClose: () => game.overlays.remove('Carpenter'),
+                ),
+            'Kitchen': (context, game) => KitchenDialog(
+                  game: game,
+                  onClose: () => game.overlays.remove('Kitchen'),
                 ),
             'Festival': (context, game) => FestivalDialog(
                   game: game,
