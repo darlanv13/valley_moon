@@ -5,6 +5,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../components/animal_component.dart';
+import '../components/boss_component.dart';
 import '../components/combat_and_mine_components.dart';
 import '../components/farm_grid_manager.dart';
 import '../components/farm_world.dart';
@@ -15,11 +16,14 @@ import '../components/player.dart';
 import '../components/time_manager.dart';
 import '../core/audio_manager.dart';
 import '../core/constants.dart';
+import '../models/act3_boss_system.dart';
 import '../models/animal_system.dart';
 import '../models/combat_and_mining_system.dart';
+import '../models/festival_system.dart';
 import '../models/fishing_system.dart';
 import '../models/inventory_system.dart';
 import '../models/npc_dialogue_system.dart';
+import '../models/save_system.dart';
 import '../models/story_system.dart';
 import '../models/time_system.dart';
 
@@ -42,6 +46,9 @@ class ValleyMoonGame extends FlameGame
   final AnimalManager animals = AnimalManager();
   final PlayerCombatStats combat = PlayerCombatStats();
   final MineFloorManager mine = MineFloorManager();
+  final FestivalManager festivals = FestivalManager();
+  final Act3BossState boss = Act3BossState();
+  FestivalType? activeFestival;
 
   GameLocation currentLocation = GameLocation.farm;
   NpcId? activeDialogueNpc;
@@ -121,6 +128,11 @@ class ValleyMoonGame extends FlameGame
       animals.onNewDay();
       animals.updateWeatherAndShelter(gameState);
       relationships.onNewDay();
+      activeFestival = festivals.getActiveFestival(gameState.season, gameState.day);
+      if (activeFestival != null) {
+        playBGM(GameConstants.bgmFestival);
+      }
+      SaveManager.saveGame(this);
     };
 
     gameState.addListener(() {
@@ -221,13 +233,49 @@ class ValleyMoonGame extends FlameGame
         playBGM(GameConstants.bgmForest);
         break;
       case GameLocation.mineEntrance:
-        playBGM(GameConstants.bgmWind);
-        if (mine.activeFloor == null) {
-          mine.loadFloor(1, story: story);
+        if (mine.currentFloor >= 100) {
+          loadFloor100Boss();
+        } else {
+          playBGM(GameConstants.bgmWind);
+          if (mine.activeFloor == null) {
+            mine.loadFloor(1, story: story);
+          }
+          spawnMineFloorMonsters();
         }
-        spawnMineFloorMonsters();
         break;
     }
+  }
+
+  void loadFloor100Boss() {
+    playBGM(GameConstants.bgmBoss);
+    for (final monster in world.children.whereType<MonsterComponent>().toList()) {
+      monster.removeFromParent();
+    }
+    for (final arena in world.children.whereType<BossArenaComponent>().toList()) {
+      arena.removeFromParent();
+    }
+    world.add(BossArenaComponent(
+      bossState: boss,
+      arenaCenter: Vector2(320, 240),
+    ));
+  }
+
+  void openFestival([FestivalType? f]) {
+    final fest = f ?? activeFestival ?? festivals.getActiveFestival(gameState.season, gameState.day) ?? FestivalType.firstSeed;
+    activeFestival = fest;
+    try {
+      overlays.add('Festival');
+    } catch (_) {}
+  }
+
+  void openAct3VictoryDialog() {
+    try {
+      overlays.add('Act3Victory');
+    } catch (_) {}
+  }
+
+  Future<bool> saveCurrentGame() async {
+    return await SaveManager.saveGame(this);
   }
 
   void spawnMineFloorMonsters() {
@@ -335,6 +383,12 @@ class ValleyMoonGame extends FlameGame
         return KeyEventResult.handled;
       }
 
+      // Open Seasonal Festival with 'P'
+      if (event.logicalKey == LogicalKeyboardKey.keyP) {
+        openFestival();
+        return KeyEventResult.handled;
+      }
+
       // Interact with nearby NPC or Farm Animal with 'E' or 'Enter'
       if (event.logicalKey == LogicalKeyboardKey.keyE ||
           event.logicalKey == LogicalKeyboardKey.enter) {
@@ -354,6 +408,8 @@ class ValleyMoonGame extends FlameGame
 
       // Close modal on Escape
       if (event.logicalKey == LogicalKeyboardKey.escape) {
+        if (overlays.isActive('Act3Victory')) overlays.remove('Act3Victory');
+        if (overlays.isActive('Festival')) overlays.remove('Festival');
         if (overlays.isActive('Forge')) overlays.remove('Forge');
         if (overlays.isActive('FishingMinigame')) overlays.remove('FishingMinigame');
         if (overlays.isActive('Dialogue')) overlays.remove('Dialogue');

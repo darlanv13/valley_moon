@@ -39,6 +39,8 @@ flutter:
     - assets/images/cave/
     - assets/images/monsters/
     - assets/images/equipment/
+    - assets/images/festivals/
+    - assets/images/boss/
     - assets/images/ui/
     - assets/tiles/
     - assets/audio/

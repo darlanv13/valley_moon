@@ -35,6 +35,8 @@ class GameConstants {
   static const String bgmForest = 'forest.ogg';
   static const String bgmRain = 'rain.ogg';
   static const String bgmWind = 'wind.ogg';
+  static const String bgmFestival = 'festival.ogg';
+  static const String bgmBoss = 'boss_battle.ogg';
   static const String sfxFootstep = 'footstep_grass.ogg';
   static const String sfxChop = 'chop.ogg';
   static const String sfxToolSwing = 'tool_swing.ogg';
@@ -57,8 +59,11 @@ class GameConstants {
   static const String sfxWoodClick = 'wood_click.ogg';
   static const String sfxBagOpen = 'bag_open.ogg';
   static const String sfxBagClose = 'bag_close.ogg';
+  static const String sfxPurify = 'purify.ogg';
+  static const String sfxBossRoar = 'boss_roar.ogg';
+  static const String sfxVictory = 'victory_fanfare.ogg';
 
-  // Crop, Magic, Mine & Monster Sprites
+  // Crop, Magic, Mine, Monster & Festival Sprites
   static const String cropsSheet = 'tiles/crops.png';
   static const String scarecrowImg = 'tiles/scarecrow.png';
   static const String rainTotemImg = 'tiles/rain_totem.png';
@@ -68,5 +73,10 @@ class GameConstants {
   static const String caveTilesSheet = 'cave/cave_tiles.png';
   static const String magicBoltImg = 'equipment/magic_bolt.png';
   static const String slashArcImg = 'equipment/slash_arc.png';
+  static const String festivalDecorationsImg = 'festivals/festival_decorations.png';
+  static const String corruptedGuardianImg = 'boss/corrupted_guardian.png';
+  static const String grandfatherAmberImg = 'boss/grandfather_amber.png';
+  static const String lunarTreeImg = 'boss/lunar_tree.png';
+  static const String titleLogoImg = 'ui/title_logo.png';
 }
 

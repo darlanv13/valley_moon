@@ -13,7 +13,7 @@ class HudOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge([game.gameState, game.inventory, game.combat]),
+      listenable: Listenable.merge([game.gameState, game.inventory, game.combat, game.festivals, game.boss]),
       builder: (context, _) {
         final state = game.gameState;
         final inv = game.inventory;
@@ -234,6 +234,70 @@ class HudOverlay extends StatelessWidget {
             ),
             child: const Center(
               child: Text('⚒️', style: TextStyle(fontSize: 18)),
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 6),
+
+        // Seasonal Festival Button (Highlight if festival today!)
+        GestureDetector(
+          onTap: () => game.openFestival(),
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: game.festivals.isFestivalDay(state.season, state.day)
+                  ? Colors.amber[200]
+                  : GameConstants.parchmentLight,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: game.festivals.isFestivalDay(state.season, state.day)
+                    ? Colors.amber[900]!
+                    : GameConstants.rusticWood,
+                width: 2.5,
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black38,
+                  offset: Offset(1, 2),
+                  blurRadius: 3,
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Text('🎉', style: TextStyle(fontSize: 18)),
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 6),
+
+        // Quick Save Button
+        GestureDetector(
+          onTap: () async {
+            final saved = await game.saveCurrentGame();
+            if (saved) {
+              game.playSFX(GameConstants.sfxVictory);
+            }
+          },
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: GameConstants.parchmentLight,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: GameConstants.rusticWood, width: 2.5),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black38,
+                  offset: Offset(1, 2),
+                  blurRadius: 3,
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Text('💾', style: TextStyle(fontSize: 18)),
             ),
           ),
         ),
