@@ -63,12 +63,6 @@ class PlayerComponent extends SpriteAnimationGroupComponent<PlayerState>
 
   bool get isInvincible => _isDashing;
 
-  bool _isDashing = false;
-  double _dashTimer = 0.0;
-  double _dashCooldown = 0.0;
-
-  bool get isInvincible => _isDashing;
-
   // Collision hitbox: centered at the character's feet (in 48x48 cell)
   late final RectangleHitbox feetHitbox;
 
